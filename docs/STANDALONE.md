@@ -80,7 +80,7 @@ Use Quickshell's path helpers (`Quickshell.shellDir`, `Quickshell.statePath`,
    - source checkout: `qs -p <checkout>`
    - installed: a small `phantom` wrapper that runs Quickshell with the
      installed shell path.
-4. Update the Hyprland autostart to the new path and keep a manual fallback.
+4. Update the Hyprland autostart to the new path.
 5. Update the Hyprland layer rule to match `^phantom-bar$` (already done) and
    move `phantom-colors.lua` into the Phantom installation or a documented
    optional Hyprland snippet.
@@ -91,8 +91,9 @@ Use Quickshell's path helpers (`Quickshell.shellDir`, `Quickshell.statePath`,
    PipeWire, BlueZ, Hyprland).
 8. Add `VERSION`, `CHANGELOG.md`, a license, and release tags.
 9. Add CI for JSON theme validation and QML syntax/load checks.
-10. Keep Noctalia available as an optional manual fallback until the remaining
-    milestones (notifications, launcher, control center) are implemented.
+10. The Noctalia shell has been removed. Keep `noctalia-qs` only as the
+    Quickshell runtime until Phantom can switch to a standalone Quickshell
+    package.
 
 ## Decoupling rules
 

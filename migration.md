@@ -24,7 +24,7 @@ Phantom should provide the essential functionality of Noctalia without depending
 6. Avoid unnecessary dependencies.
 7. Document every additional system package installed.
 8. Validate code before declaring any milestone complete.
-9. Keep Noctalia available as a fallback throughout development.
+9. Noctalia has been removed; Phantom is the only session shell.
 10. Let the user perform final visual and behavioral acceptance testing.
 11. Use `$HOME` for every file or directory path that points into the user's home directory. Never hardcode a username or an absolute `/home/<user>` path.
 12. Treat Phantom as a standalone project. Do not couple it permanently to the dotfiles repository, a specific user name, or Noctalia's runtime files.
@@ -1338,34 +1338,50 @@ Do not claim user behavior has been verified unless it has actually been tested.
 
 ---
 
-# 6. Migration and rollback strategy
+# 6. Migration status and rollback
 
-Noctalia must remain available during development.
+The Noctalia shell has been removed from the session and its user files have
+been removed. The `noctalia-shell` package still needs to be uninstalled; the
+command is below. `noctalia-qs` remains only as the Quickshell runtime that
+provides `qs`.
 
-### Development stage
+### Removed integration
 
-- Run Quickshell manually.
-- Keep Noctalia startup configuration untouched.
-- Avoid starting competing notification daemons.
-- Test the new status bar independently.
+- The Noctalia autostart command and compositor layer rule.
+- The Noctalia IPC keybindings. `SUPER + SPACE` now starts `hyprlauncher`.
+- Noctalia-generated colors and themes for the compositor and applications.
+- Noctalia config, data, cache and state directories.
 
-### Integration stage
+All removed or modified user files are backed up under
+`$HOME/noctalia-backup-20261107`.
 
-- Disable only the Noctalia component being replaced.
-- Enable the equivalent custom component.
-- Verify that no duplicate panels or notification services appear.
-- Keep a backup of the original configuration.
+### Package removal
 
-### Final migration
+The shell package itself still needs to be removed by the user:
 
-Only after the required modules are stable:
+```bash
+sudo pacman -R noctalia-shell
+sudo pacman -D --asexplicit noctalia-qs
+```
 
-- Remove Noctalia from the startup configuration.
-- Enable Quickshell at session startup.
-- Verify session startup and shutdown.
-- Verify suspend/resume.
-- Verify monitor hotplugging.
-- Retain the ability to launch Noctalia manually as a fallback until satisfied.
+Use plain `-R` rather than `-Rns`, because `noctalia-qs` must remain installed
+for Phantom. Marking it explicit prevents orphan cleanup from removing it.
+
+### Session verification
+
+- Phantom starts from the Hyprland configuration with
+  `qs -p $HOME/Workspace/phantom-shell --daemonize`.
+- Only one Quickshell instance runs.
+- Phantom owns the status notifier watcher and tray.
+- No Noctalia process or layer surfaces remain.
+- Hyprland reports no configuration errors.
+
+### Rollback
+
+The backup can restore the removed user files, and reinstalling
+`noctalia-shell` plus restoring the startup and keybinding changes would bring
+Noctalia back. That path is no longer the supported configuration; Phantom is
+the only session shell.
 
 ---
 

@@ -4,6 +4,11 @@ This document records how the shell was validated. Results distinguish between
 what was syntactically validated, runtime tested, system-integration tested, and
 what still requires user acceptance testing.
 
+> The Noctalia shell has been removed from the session and its user files have
+> been removed; the package may still be installed until the documented pacman
+> command is run. Historical notes below still mention it; `noctalia-qs` remains
+> only as the Quickshell runtime.
+
 ## Static validation
 
 Performed:
@@ -147,7 +152,6 @@ Performed in the live Hyprland session:
 
 ```bash
 pkill -x qs
-pkill -x noctalia
 qs -p $HOME/Workspace/phantom-shell --daemonize
 hyprctl layers
 busctl --user list | grep -iE "StatusNotifier|notifications"
@@ -157,12 +161,11 @@ Results:
 
 | Check | Result |
 |---|---|
-| Noctalia stopped | No `noctalia` process or layer surfaces remain |
 | Phantom running | One instance (PID 91159 at test time), config `$HOME/Workspace/phantom-shell` |
 | Bar layer | `phantom-bar`, `0 4 2560 38` |
 | Wallpaper layer | `phantom-wallpaper`, `0 0 2560 1440` |
 | Tray watcher | `org.kde.StatusNotifierWatcher` and `StatusNotifierHost` owned by `qs` |
-| Tray icons | Populate after Noctalia releases the watcher |
+| Tray icons | Populate through the Phantom-owned StatusNotifier watcher |
 | Notification daemon | No owner for `org.freedesktop.Notifications` (expected until Milestone 4) |
 | Duplicate instances | None |
 
@@ -173,14 +176,13 @@ exact command verified manually, and both edited Lua files pass `luac -p`.
 
 - `noctalia-qs` warns that it was built against Qt 6.11.2 while Qt 6.12.0 is
   installed. It runs, but the package should be rebuilt.
-- The session now runs only Phantom, so it owns the StatusNotifier
-  watcher and tray icons populate. If Noctalia is started manually for fallback,
-  it takes the watcher back and the custom tray will be empty.
+- The session runs only Phantom, which owns the StatusNotifier watcher and
+  populates tray icons.
 - There is no notification daemon until Milestone 4. Applications cannot show
   desktop notifications in the meantime.
-- Noctalia's launcher, control center, settings panel, OSD and annotation/lock
-  IPC are inactive. Their existing keybindings only work in the manual Noctalia
-  fallback session.
+- The Noctalia shell has been removed. Its launcher, control center, settings
+  panel, OSD and annotation/lock IPC are gone; `SUPER + SPACE` now starts
+  `hyprlauncher`, and Phantom's own launcher is planned for Milestone 5.
 - The desktop wallpaper is a dedicated Quickshell background layer driven by
   `Settings.wallpaperPath`; the control center wallpaper picker updates it and
   persists the path.

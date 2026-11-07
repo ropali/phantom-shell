@@ -7,7 +7,7 @@ Everything below was already present on the system.
 
 | Package | Reason | Feature | Mandatory |
 |---|---|---|---|
-| `noctalia-qs` | Provides `/usr/bin/qs` and `/usr/bin/quickshell`, including the Quickshell QML modules and service plugins (Hyprland, PipeWire, Networking, Bluetooth, SystemTray, UPower, Notifications) | Entire shell | Yes |
+| `noctalia-qs` | Provides `/usr/bin/qs` and `/usr/bin/quickshell`, including the Quickshell QML modules and service plugins (Hyprland, PipeWire, Networking, Bluetooth, SystemTray, UPower, Notifications). The package name is historical; this is the Quickshell runtime, not the Noctalia shell. | Entire shell | Yes |
 | `qt6-declarative` | Qt Quick, Qt Quick Layouts and `Qt.labs.folderlistmodel` used by the theme manager | Bar UI, theme discovery | Yes |
 | `hyprland` | Compositor and window manager; provides `hyprctl` and the Hyprland IPC | Workspaces, power menu logout | Yes |
 | `pipewire` / `wireplumber` | Audio backend exposed through `Quickshell.Services.Pipewire` | Audio button and volume control | Yes for audio |
@@ -25,8 +25,9 @@ Everything below was already present on the system.
 
 ## Session integration notes
 
-- No new package was installed when Noctalia was removed from the Hyprland
-  autostart.
+- The Noctalia shell is disabled and its user files were removed. Uninstall its
+  package with `sudo pacman -R noctalia-shell`; keep `noctalia-qs` because
+  Phantom's `qs` binary and QML modules come from it.
 - No wallpaper daemon (hyprpaper/swaybg/swww) is installed. The temporary static
   wallpaper is drawn by Quickshell itself, so no package is needed.
 - No standalone notification daemon is installed. Desktop notifications are

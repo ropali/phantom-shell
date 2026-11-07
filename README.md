@@ -1,7 +1,7 @@
 # Phantom
 
 Phantom is a modular Quickshell desktop shell for CachyOS + Hyprland + Wayland,
-built as an incremental replacement for Noctalia and intended to become a standalone project.
+intended to become a standalone project.
 
 This repository implements **Milestone 0** (environment preparation),
 **Milestone 1** (status bar), **Milestone 2** (shared shell services) and
@@ -11,7 +11,7 @@ packaging plan is in [`docs/STANDALONE.md`](docs/STANDALONE.md).
 
 ## Requirements
 
-- Quickshell (`qs`, provided here by `noctalia-qs`)
+- Quickshell (`qs`, provided by `noctalia-qs`; this is the Quickshell runtime, not the Noctalia shell)
 - Hyprland running on Wayland
 - Qt 6 with Qt Quick, Qt Quick Layouts and `Qt.labs.folderlistmodel`
 - PipeWire (audio), NetworkManager (network), BlueZ (Bluetooth)
@@ -21,7 +21,7 @@ No additional packages were installed for this milestone. See
 
 ## Run
 
-Development mode, without touching the Noctalia startup configuration:
+Development mode, without touching the session startup configuration:
 
 ```bash
 qs -p /path/to/quickshell
@@ -182,12 +182,14 @@ The shell is now the permanent session shell. `hyprland.lua` starts it at login:
 hl.exec_cmd("qs -p $HOME/Workspace/phantom-shell --daemonize")
 ```
 
-and the Noctalia autostart line was removed. Noctalia is still installed and can
-be launched manually as a fallback. See [`docs/SESSION.md`](docs/SESSION.md) for
-the exact changes and rollback commands.
+The Noctalia shell is no longer used and its user files have been removed. The
+`noctalia-shell` package still needs to be uninstalled with
+`sudo pacman -R noctalia-shell`. Keep `noctalia-qs`, which remains only as the
+Quickshell runtime that provides `qs`. See [`docs/SESSION.md`](docs/SESSION.md)
+for the removal details and backups.
 
 This shell now owns the StatusNotifier watcher, so the system tray is populated.
-A static wallpaper layer replaces Noctalia's wallpaper surface. Wallpaper
+A static wallpaper layer provides the desktop background. Wallpaper
 selection is available in the control center and persists in Quickshell state.
 
 ## Hyprland keybindings
@@ -197,15 +199,16 @@ selection is available in the control center and persists in Quickshell state.
 the migration rules. Hyprland creates a missing workspace when it is activated.
 Workspace clicks use the Hyprland 0.57 Lua IPC dispatch syntax.
 
-The Noctalia IPC volume/brightness binds were disabled because they would call a
-process that is no longer running. The direct `wpctl` and `brightnessctl` binds
-remain active, as do the playerctl media keys.
+The Noctalia IPC binds were removed. `SUPER + SPACE` now launches
+`hyprlauncher`; the direct `wpctl` and `brightnessctl` binds remain active, as do
+the playerctl media keys.
 
 ## Known limitations
 
-- Noctalia's launcher, control center, settings panel, OSD, notification daemon
-  and annotation/lock IPC are unavailable while it is not running. Their
-  keybindings still exist for the manual Noctalia fallback.
+- The Noctalia shell is no longer used, so its launcher, control center,
+  settings panel, OSD, notification daemon and annotation/lock IPC are gone.
+  Use `hyprlauncher` (`SUPER + SPACE`) and the Phantom control center; Phantom's
+  own launcher is scheduled for Milestone 5.
 - There is currently no notification daemon. Applications that require
   `org.freedesktop.Notifications` will not show notifications until Milestone 4.
 - Wi-Fi scanning starts when the network popup opens and may take several seconds
