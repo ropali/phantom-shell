@@ -60,6 +60,41 @@ property int screenMargin: 4     // gap from the bar to the screen edge
 property string barPosition: "top"  // "top" or "bottom"
 ```
 
+## Status bar buttons
+
+The Network, Bluetooth, Volume, Notifications and Power controls, the system
+tray and the control center button form a single **control center group**. Open
+the control center, click the gear icon in its header, and use the **Status
+bar** view to:
+
+- Show or hide individual controls with the switches.
+- Reorder them with the grip handles, or drag the icons directly on the status
+  bar.
+- Move the whole group to the left or right side of the bar with the
+  **Control center position** selector.
+
+The layout is saved to `Quickshell.statePath("bar.json")` as:
+
+```json
+{
+  "position": "right",
+  "items": [
+    { "id": "notifications", "visible": true },
+    { "id": "network", "visible": true },
+    { "id": "bluetooth", "visible": true },
+    { "id": "audio", "visible": true },
+    { "id": "power", "visible": true }
+  ]
+}
+```
+
+Settings saved by older versions (one boolean per button, or the previous
+per-icon `side` format) are migrated automatically.
+
+The date/time and workspace modules remain independent, fixed modules for now.
+Moving those modules is planned for a later iteration, so the group position
+only relocates the control center group; the other modules flow around it.
+
 ## Complete example
 
 ```qml

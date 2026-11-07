@@ -1,0 +1,66 @@
+{
+  "id": "phantom",
+  "name": "Phantom",
+  "colors": {
+    "background": "#0f0e17",
+    "surface": "#15141f",
+    "surfaceElevated": "#1e1d2b",
+    "primary": "#38bdf8",
+    "secondary": "#a855f7",
+    "tertiary": "#c084fc",
+    "foreground": "#e2e8f0",
+    "mutedForeground": "#94a3b8",
+    "disabled": "#475569",
+    "border": "#2e2d45",
+    "success": "#34d399",
+    "warning": "#fbbf24",
+    "error": "#fb7185",
+    "info": "#38bdf8",
+    "onPrimary": "#0f0e17",
+    "onSecondary": "#0f0e17",
+    "onTertiary": "#0f0e17"
+  },
+  "typography": {
+    "fontFamily": "JetBrainsMono Nerd Font",
+    "iconFontFamily": "JetBrainsMono Nerd Font",
+    "sizeTiny": 10,
+    "sizeSmall": 11,
+    "sizeBase": 12,
+    "sizeMedium": 13,
+    "size": 14,
+    "sizeLarge": 18,
+    "sizeXLarge": 22,
+    "weightNormal": 400,
+    "weightMedium": 500,
+    "weightBold": 700,
+    "lineHeight": 1.3
+  },
+  "spacing": {
+    "xs": 2,
+    "sm": 4,
+    "md": 8,
+    "lg": 12,
+    "xl": 16
+  },
+  "components": {
+    "radius": 16,
+    "radiusSmall": 10,
+    "radiusLarge": 22,
+    "borderWidth": 1,
+    "padding": 12,
+    "opacity": 0.90,
+    "buttonSize": 26,
+    "iconSize": 15,
+    "trayIconSize": 16,
+    "workspaceButtonSize": 24,
+    "controlHeight": 34,
+    "rowHeight": 30,
+    "shadow": true
+  },
+  "animation": {
+    "fast": 120,
+    "normal": 200,
+    "slow": 300,
+    "easing": "OutCubic"
+  }
+}

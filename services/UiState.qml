@@ -3,9 +3,11 @@ import Quickshell
 
 Singleton {
     property int openCount: 0
+    property bool detailOpen: false
     readonly property bool anyOpen: openCount > 0
 
     signal dismissRequested()
+    signal detailCloseRequested()
 
     function popupOpened() {
         openCount++;
@@ -17,5 +19,9 @@ Singleton {
 
     function dismissAll() {
         dismissRequested();
+    }
+
+    function closeDetail() {
+        detailCloseRequested();
     }
 }

@@ -111,13 +111,13 @@ Rules enforced by `ThemeLoader.qml`:
 1. Copy a bundled palette as a starting point.
 2. Give the file a unique `id`.
 3. Save it as `themes/custom/<name>.json`.
-4. Open the theme switcher (palette icon in the bar) and select it. No QML
-   changes and no restart are required.
+4. Open the control center (sliders icon in the bar), find the Theme section and
+   select it. No QML changes and no restart are required.
 
 ## Switching and persistence
 
-- The switcher lists every valid theme, shows color previews and highlights the
-  active one.
+- The control center lists every valid theme, shows color previews and
+  highlights the active one.
 - Selecting a theme calls `ThemeManager.applyTheme(id)`. All bound components
   update immediately.
 - The choice is written to Quickshell's state path

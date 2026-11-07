@@ -92,4 +92,10 @@ Singleton {
 
     readonly property color barBackground: Qt.rgba(background.r, background.g, background.b, opacity)
     readonly property color popupBackground: Qt.rgba(background.r, background.g, background.b, Math.min(1, opacity + 0.04))
+
+    readonly property color panelSurface: Qt.rgba(surface.r, surface.g, surface.b, 0.55)
+    readonly property color panelSurfaceHover: Qt.rgba(surfaceElevated.r, surfaceElevated.g, surfaceElevated.b, 0.72)
+    readonly property color accentSurface: Qt.rgba(primary.r, primary.g, primary.b, 0.16)
+    readonly property color accentBorder: Qt.rgba(primary.r, primary.g, primary.b, 0.5)
+    readonly property color subtleBorder: Qt.rgba(border.r, border.g, border.b, 0.7)
 }

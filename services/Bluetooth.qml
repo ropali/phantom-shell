@@ -33,6 +33,26 @@ Singleton {
         return result;
     }
 
+
+    readonly property int connectedCount: {
+        const list = deviceList;
+        let count = 0;
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].connected)
+                count++;
+        }
+        return count;
+    }
+
+    readonly property string connectedDeviceLabel: {
+        const list = deviceList;
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].connected)
+                return service.deviceLabel(list[i]);
+        }
+        return "";
+    }
+
     property bool discoveringRequested: false
     property var pendingConnectDevice: null
     property var attemptDevice: null

@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Wayland
 import "../themes"
 import "../config" as Config
 import "../services" as Services
@@ -38,7 +39,13 @@ PopupWindow {
         }
     }
 
+    BackgroundEffect.blurRegion: Region {
+        item: background
+        radius: Theme.radius
+    }
+
     Rectangle {
+        id: background
         anchors.fill: parent
         radius: Theme.radius
         color: Theme.popupBackground

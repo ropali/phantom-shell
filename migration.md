@@ -570,6 +570,25 @@ These actions must use appropriate system/session APIs and must not be simulated
 
 ---
 
+### 1.5 Bar module groups
+
+The status bar is organized as independent modules:
+
+- Date/time.
+- Workspaces.
+- Control center group: the system tray, the configurable system controls and
+  the control center button.
+
+The control center group is placed as a unit on the left or right side of the
+bar. Individual controls can be shown or hidden and reordered. Icons can be
+reordered by dragging them directly on the status bar, or from the control
+center's **Status bar** settings view. The layout is persisted and older
+per-button settings are migrated automatically.
+
+Date/time and workspace modules are intentionally fixed for now. They are
+independent modules and may become movable in a later iteration; the control
+center group already supports per-group positioning.
+
 ## Milestone 2: Shared shell infrastructure
 
 Once the initial bar works, extract common functionality into reusable services.
@@ -590,43 +609,510 @@ All services should expose reactive properties and reusable methods.
 UI components must not independently implement system integrations.
 
 ---
+# Milestone 3: Control Center — Widget-Based Quick Settings
 
-## Milestone 3: Control center
+**Priority: High**
 
-Create a dedicated quick-settings panel. Though some of these already have their own dedicated buttons so keep them as it is(except theme switcher, move it to control center) but add those option in here as well.
+## 1. Objective
 
-Features:
+Build a compact, visually appealing control center using independent widgets/cards.
 
-- Wi-Fi toggle and network selection.
-- Bluetooth toggle and device management.
-- Audio volume.
-- Audio output selection.
-- Audio input selection.
-- Brightness.
-- Battery status.
-- Power profile.
-- Night light.
-- Do Not Disturb.
-- Theme switcher,
-- Wallpaper selector
+The control center must NOT be implemented as a conventional settings page containing long, vertically stacked lists of all available devices, networks, audio sources or wallpapers.
 
-The control center should use the shared system services.
+Instead, it should provide an overview of available system controls. Individual widgets should open their respective detailed management interfaces when clicked.
 
+The design should follow a dashboard-based approach with compact cards, clear visual grouping and consistent spacing.
+
+## 2. Core interaction principles
+
+1. The initial control center view must display an overview of system controls.
+2. Each system feature must have its own independent widget.
+3. Clicking a widget should open its dedicated detail view.
+4. Detailed device lists and configuration options must not be displayed directly in the overview.
+5. Reuse existing system management components wherever available.
+6. Do not implement the same system integration or UI functionality twice.
+7. Support quick actions such as toggling Wi-Fi, Bluetooth, Night Light and Do Not Disturb directly from the overview where appropriate.
+8. The control center must use the global theme manager.
+
+## 3. Control center overview
+
+Organize the following widgets into a responsive grid.
+
+### Connectivity
+
+**Wi-Fi widget**
+- Display current connection state.
+- Display connected network name.
+- Provide a quick enable/disable action.
+- Clicking the widget opens the existing Wi-Fi management interface.
+
+**Bluetooth widget**
+- Display Bluetooth enabled/disabled state.
+- Display the number of connected devices.
+- Provide a quick enable/disable action.
+- Clicking the widget opens the existing Bluetooth management interface.
+
+### Audio
+
+**Audio widget**
+- Display current output device.
+- Display current volume.
+- Optionally provide a compact volume slider.
+- Clicking the widget opens the detailed audio interface.
+
+The detailed interface should support:
+- Output device selection.
+- Input device selection.
+- Master volume.
+- Microphone volume.
+- Mute controls.
+- Per-application volume where supported.
+
+Do not display all audio devices in the overview.
+
+### Display
+
+**Brightness widget**
+- Display current brightness.
+- Provide a compact slider.
+- Support multiple displays where possible.
+
+**Night Light widget**
+- Display enabled/disabled state.
+- Provide a quick toggle.
+- Clicking the widget opens additional configuration if supported.
+
+### Power and battery
+
+**Battery widget**
+- Display battery percentage.
+- Display charging/discharging state.
+- Show estimated remaining time when available.
+- Clicking opens detailed battery information.
+
+**Power Profile widget**
+- Display current power profile.
+- Clicking opens available power profiles.
+- Allow switching between profiles.
+
+### Notifications
+
+**Do Not Disturb widget**
+- Display current state.
+- Provide a quick toggle.
+- Clicking can open additional notification settings.
+
+### Appearance
+
+**Theme widget**
+- Display the currently selected theme.
+- Display a small theme preview.
+- Clicking opens the theme selector.
+
+The theme selector must use the global ThemeManager.
+
+**Wallpaper widget**
+- Display the current wallpaper thumbnail.
+- Clicking opens the dedicated wallpaper selector.
+
+Do not display a grid of every available wallpaper inside the control center overview.
+
+The wallpaper selector should be a separate interface supporting previews and selection.
+
+## 4. Detail view behavior
+
+Every widget that provides detailed management functionality must have a dedicated detail view.
+
+Examples:
+
+- Wi-Fi card → Wi-Fi management.
+- Bluetooth card → Bluetooth management.
+- Audio card → Audio management.
+- Appearance card → Theme selector.
+- Wallpaper card → Wallpaper selector.
+- Power profile card → Power profile selector.
+
+Detail views should:
+
+- Open as a popup, subpanel or dedicated overlay.
+- Have a clear title.
+- Provide a back/close action.
+- Support appropriate keyboard navigation.
+- Close when Escape is pressed.
+- Use the same global theme.
+- Avoid unnecessary nested scrolling.
+
+Only one detail view should be active at a time unless there is a clear reason to support multiple independent popups.
+
+## 5. Reuse existing functionality
+
+Some controls already have dedicated buttons in the status bar.
+
+Do not remove or replace those buttons.
+
+Instead, expose the same functionality through the control center.
+
+For example:
+
+```text
+Status Bar Bluetooth Button ─────┐
+                                │
+                                ├── Bluetooth Service
+                                │
+Control Center Bluetooth Card ──┘
+                                │
+                                └── Bluetooth Detail View
+```
+
+Both entry points must use the same service and detail component.
+
+Apply the same architecture to:
+
+- Wi-Fi.
+- Bluetooth.
+- Audio.
+- Notifications.
+- Other existing controls.
+
+The theme selector is an exception: move its primary entry point into the control center rather than keeping a separate theme button in the status bar.
+
+## 6. Layout and visual requirements
+
+- Use a compact responsive card grid.
+- Prefer two or three columns depending on available width.
+- Avoid a permanently scrollable overview.
+- Keep card heights reasonably consistent.
+- Use clear icons and short descriptions.
+- Display important system state without overwhelming the interface.
+- Provide subtle hover and pressed states.
+- Use consistent component spacing and border radii.
+- Support keyboard navigation and accessibility.
+- Support multiple monitors.
+- Ensure all cards follow the currently active global theme.
+
+The control center should be visually closer to a compact desktop dashboard than a traditional settings application.
+
+## 7. Technical architecture
+
+Suggested structure:
+
+```text
+modules/
+└── control-center/
+    ├── ControlCenter.qml
+    ├── ControlCenterGrid.qml
+    │
+    ├── widgets/
+    │   ├── WifiWidget.qml
+    │   ├── BluetoothWidget.qml
+    │   ├── AudioWidget.qml
+    │   ├── BrightnessWidget.qml
+    │   ├── BatteryWidget.qml
+    │   ├── PowerProfileWidget.qml
+    │   ├── NightLightWidget.qml
+    │   ├── DoNotDisturbWidget.qml
+    │   ├── ThemeWidget.qml
+    │   └── WallpaperWidget.qml
+    │
+    └── views/
+        ├── WifiView.qml
+        ├── BluetoothView.qml
+        ├── AudioView.qml
+        ├── ThemeSelector.qml
+        └── WallpaperSelector.qml
+```
+
+These views must consume the shared services:
+
+- Network service.
+- Bluetooth service.
+- Audio service.
+- Battery service.
+- Power profile service.
+- Notification service.
+- Theme manager.
+- Wallpaper service.
+
+Do not duplicate system integrations inside individual widgets.
+
+## 8. Testing and acceptance criteria
+
+Verify:
+
+1. Control center opens without QML errors.
+2. Overview displays all configured widgets.
+3. Widgets display actual system state.
+4. Wi-Fi card opens the existing Wi-Fi interface.
+5. Bluetooth card opens the existing Bluetooth interface.
+6. Audio card opens the existing audio interface.
+7. Theme selection updates the entire shell.
+8. Wallpaper selection updates the desktop.
+9. Quick toggles update actual system state.
+10. Status bar buttons and control center widgets remain synchronized.
+11. No duplicate Bluetooth, network or audio implementations exist.
+12. No long device lists appear in the initial overview.
+13. Detail views open and close correctly.
+14. The layout follows the active global theme.
+
+**Acceptance criterion:** The control center must initially feel like a compact dashboard. Detailed system configuration should only appear after the user explicitly opens the corresponding widget.
 ---
 
-## Milestone 4: Notification center
+# Milestone 4: Notification Center and Notification Popups
 
-Implement:
+**Priority: High**
 
-- Notification popups.
-- Notification history.
-- Notification actions.
-- Dismiss functionality.
-- Do Not Disturb.
+## Objective
+
+Implement a complete custom notification experience using Quickshell.
+
+The implementation should follow the supplied visual reference: a floating notification center containing Do Not Disturb controls, a media player and notification cards.
+
+The notification center must not be a conventional notification list with no structure.
+
+It should be a polished desktop panel with independent sections.
+
+## 1. Notification architecture
+
+Use Quickshell's native NotificationServer integration through:
+
+```qml
+import Quickshell.Services.Notifications
+```
+
+The shell should own the notification service and provide a shared notification store.
+
+The architecture should look like:
+
+```text
+Applications
+     |
+     v
+NotificationServer
+     |
+     v
+NotificationService
+     |
+     ├── Notification History
+     |
+     ├── Notification Popups
+     |
+     ├── Notification Center
+     |
+     └── Do Not Disturb State
+```
+
+Only one process should own the freedesktop notification service.
+
+Do not run multiple competing notification daemons.
+
+## 2. Notification center UI
+
+Create a floating panel positioned on the right side of the active monitor.
+
+Requirements:
+
+- Configurable width and height.
+- Rounded corners.
+- Theme-aware background.
+- Appropriate transparency and blur where supported.
+- Smooth opening and closing animations.
+- Independent scrolling for notification history when necessary.
+- Close on Escape.
+- Close on outside click.
+- Support multiple monitors.
+
+The panel should contain three independent sections.
+
+### A. Header and Do Not Disturb
+
+Display:
+
+- Notification center heading.
+- Settings button.
+- Do Not Disturb toggle.
+
+DND must be controlled through the shared notification service.
+
+### B. Media player
+
+Display the currently active MPRIS media player.
+
+Requirements:
+
+- Album artwork.
+- Track title.
+- Artist name.
+- Play/pause.
+- Previous/next track.
+- Shuffle.
+- Repeat.
+- Playback progress where practical.
+
+Automatically hide the section if no supported media player is available.
+
+Do not implement a separate media player backend.
+
+### C. Notification history
+
+Display actual notifications received from applications.
+
+Each notification card should contain:
+
+- Application icon.
+- Application name.
+- Notification title.
+- Notification body.
+- Timestamp.
+- Available notification actions.
+- Dismiss control.
+
+Support:
+
+- Grouping by application.
+- Expand/collapse groups.
+- Individual dismissal.
 - Clear all notifications.
-- Notification grouping.
+- Notification actions.
+- Inline replies where supported.
+- Urgency indicators.
 
-Ensure there is only one active notification daemon.
+Display the most recent notifications first.
+
+Provide a sensible maximum history size configurable by the user.
+
+Persist notification history so that it survives Quickshell reloads and, where practical, system restarts.
+
+Transient notifications should not be stored in persistent history when their protocol flags require otherwise.
+
+## 3. Notification popups
+
+Implement a separate notification popup layer.
+
+When an application sends a notification:
+
+1. Receive it through NotificationServer.
+2. Store it in the notification service.
+3. Update the notification center.
+4. Display a popup unless DND suppresses it.
+5. Automatically dismiss the popup after its timeout.
+
+Requirements:
+
+- Floating notification cards.
+- Configurable screen position.
+- Automatic dismissal.
+- Manual dismissal.
+- Multiple notification support.
+- Urgency-based styling.
+- Application icons.
+- Notification actions.
+- Smooth animations.
+- Consistent global theming.
+
+Critical notifications should receive special treatment.
+
+Notification popup dismissal must not automatically delete the corresponding notification from history.
+
+## 4. Shared state and integration
+
+The notification service must be the single source of truth.
+
+The following components must use the same service:
+
+- Status bar notification button.
+- Notification center.
+- Control center DND widget.
+- Notification popup layer.
+
+Synchronize:
+
+- Unread notification count.
+- Notification history.
+- DND state.
+- Active popup count.
+
+Do not create separate notification state inside each UI component.
+
+## 5. Suggested project structure
+
+```text
+services/
+└── NotificationService.qml
+
+modules/
+└── notifications/
+    ├── NotificationCenter.qml
+    ├── NotificationCenterHeader.qml
+    ├── NotificationHistory.qml
+    ├── NotificationGroup.qml
+    ├── NotificationCard.qml
+    ├── NotificationActions.qml
+    ├── NotificationPopupLayer.qml
+    ├── NotificationPopup.qml
+    ├── DoNotDisturb.qml
+    └── MediaPlayerWidget.qml
+```
+
+## 6. Global theming
+
+All notification components must use the shared ThemeManager.
+
+Theme properties should cover:
+
+- Notification card background.
+- Popup background.
+- Application icon presentation.
+- Urgency colors.
+- Text colors.
+- Border radius.
+- Spacing.
+- Shadows.
+- Animation durations.
+- Media player artwork presentation.
+
+Do not hardcode component colors.
+
+## 7. Keyboard shortcuts
+
+Suggested shortcuts:
+
+| Shortcut | Action |
+|---|---|
+| SUPER + N | Toggle notification center |
+| SUPER + SHIFT + N | Toggle Do Not Disturb |
+
+The status bar notification button should also toggle the same notification center.
+
+## 8. Testing requirements
+
+Test with real notifications.
+
+Examples:
+
+```bash
+notify-send "Test notification" "Hello from Quickshell"
+notify-send -u low "Low priority" "Test message"
+notify-send -u critical "Critical notification" "Important message"
+```
+
+Verify:
+
+1. Applications can send notifications.
+2. Notifications appear as popups.
+3. Notifications appear in history.
+4. Popup timeout works.
+5. Individual dismissal works.
+6. Clear all works.
+7. Notification actions work where supported.
+8. DND suppresses ordinary popups.
+9. Critical notifications follow configured policy.
+10. Notification history survives shell reload.
+11. Media player integration works with an actual MPRIS player.
+12. Status bar and control center reflect the same notification state.
+13. No competing notification daemons are running.
+14. All components respect the active theme.
+
+Do not mark this milestone complete until Quickshell has been technically tested with real application notifications.
 
 ---
 

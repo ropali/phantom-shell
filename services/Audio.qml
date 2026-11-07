@@ -16,6 +16,8 @@ Singleton {
     readonly property bool sourceMuted: sourceAudio ? sourceAudio.muted : false
     readonly property real volume: audio ? audio.volume : 0
     readonly property int volumePercent: Math.round(volume * 100)
+    readonly property real sourceVolume: sourceAudio ? sourceAudio.volume : 0
+    readonly property int sourceVolumePercent: Math.round(sourceVolume * 100)
 
     readonly property var sinks: {
         const result = [];
@@ -57,6 +59,12 @@ Singleton {
     function toggleMute() {
         if (audio)
             audio.muted = !audio.muted;
+    }
+
+    function setSourceVolume(value) {
+        if (!sourceAudio)
+            return;
+        sourceAudio.volume = Math.max(0, Math.min(1.5, value));
     }
 
     function toggleSourceMute() {

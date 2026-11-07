@@ -4,10 +4,10 @@ Phantom is a modular Quickshell desktop shell for CachyOS + Hyprland + Wayland,
 built as an incremental replacement for Noctalia and intended to become a standalone project.
 
 This repository implements **Milestone 0** (environment preparation),
-**Milestone 1** (status bar) and **Milestone 2** (shared shell services), plus
-the mandatory **global theming system**. It is intended to become a standalone
-project called Phantom; the extraction and packaging plan is in
-[`docs/STANDALONE.md`](docs/STANDALONE.md).
+**Milestone 1** (status bar), **Milestone 2** (shared shell services) and
+**Milestone 3** (control center), plus the mandatory **global theming system**.
+It is intended to become a standalone project called Phantom; the extraction and
+packaging plan is in [`docs/STANDALONE.md`](docs/STANDALONE.md).
 
 ## Requirements
 
@@ -55,18 +55,42 @@ phantom-shell/
 │   ├── Network.qml
 │   ├── Bluetooth.qml
 │   ├── Notifications.qml
+│   ├── Brightness.qml
+│   ├── Battery.qml
+│   ├── PowerProfiles.qml
+│   ├── NightLight.qml
+│   ├── Wallpapers.qml
+│   ├── Media.qml
 │   ├── Session.qml
 │   ├── SystemTray.qml
 │   └── UiState.qml
 ├── modules/
 │   ├── statusbar/            # bar, sections, calendar, tray, power menu
-│   ├── theme/ThemeSwitcher.qml
-│   └── wallpaper/Wallpaper.qml   # temporary static wallpaper surface
+│   ├── controlcenter/        # dashboard and detail views
+│   │   ├── ControlCenter.qml
+│   │   ├── ControlCenterOverview.qml
+│   │   ├── ControlCenterDetail.qml
+│   │   ├── ControlCenterKeys.qml
+│   │   ├── MediaCard.qml
+│   │   └── views/            # Wi-Fi, Bluetooth, audio, theme, wallpaper details
+│   ├── nightlight/           # click-through warm overlay
+│   └── wallpaper/Wallpaper.qml   # static wallpaper surface
 ├── components/
+│   ├── AudioPanel.qml        # shared with the bar audio popup
+│   ├── BluetoothPanel.qml    # shared with the bar Bluetooth popup
+│   ├── NetworkPanel.qml      # shared with the bar network popup
 │   ├── IconButton.qml
+│   ├── MiniSlider.qml
+│   ├── OverviewSliderRow.qml
 │   ├── Popup.qml
+│   ├── QuickToggle.qml
+│   ├── SettingRow.qml
+│   ├── SettingSlider.qml
+│   ├── StatChip.qml
+│   ├── ThemePicker.qml
 │   ├── ToggleSwitch.qml
-│   └── Tooltip.qml
+│   ├── Tooltip.qml
+│   └── WallpaperPicker.qml
 ├── docs/
 │   ├── CONFIGURATION.md
 │   ├── PACKAGES.md
@@ -96,10 +120,40 @@ and call service methods; they do not run `hyprctl`, `nmcli`, `wpctl`,
 - Center: Hyprland workspaces, driven by Quickshell's event-driven Hyprland
   integration. Click switches workspace; new workspaces appear automatically.
 - Right: system tray with themed DBusMenu context menus, notification
-  placeholder with Do Not Disturb, theme switcher, network (Wi-Fi and
+  placeholder with Do Not Disturb, control center, network (Wi-Fi and
   Ethernet), Bluetooth, audio (output/input selection), and a power menu using
-  real session APIs. Each control has its own
-  popup; clicking another bar icon switches directly without a second click.
+  real session APIs. Each control has its own popup; clicking another bar icon
+  switches directly without a second click.
+
+## Control center
+
+The sliders button opens a compact vertical dashboard modeled on a desktop
+quick-settings panel:
+
+- Profile header with Phantom branding, power and close actions.
+- A row of quick toggles for Wi-Fi, Bluetooth, DND and night light. Each tile
+  toggles on click and opens its detail view from the small chevron.
+- Output and input audio sliders with the active device names.
+- Brightness and night-light sliders.
+- A system card with battery/AC state and chips for network, Bluetooth and
+  power profile.
+- Side-by-side theme and wallpaper cards.
+- A now-playing media card when an MPRIS player is available.
+
+Clicking a card or chevron opens a dedicated detail view with a back action.
+Wi-Fi, Bluetooth and audio reuse the same `NetworkPanel`, `BluetoothPanel` and
+`AudioPanel` components as the status bar popups, so there is only one
+implementation per system integration. The theme selector and wallpaper picker
+also open as detail views. `Escape` closes the active detail view, and only one
+detail view can be active at a time.
+
+The dedicated network, Bluetooth, audio and power buttons remain in the bar.
+Theme switching moved from the bar into the control center. Wallpaper selection
+is persisted in Quickshell state.
+
+Night light is a click-through warm overlay, so it works without a gamma daemon
+or backlight control. Brightness is shown as unavailable on systems without a
+`backlight` device. See [`docs/SERVICES.md`](docs/SERVICES.md).
 
 ## Bar configuration
 
@@ -113,8 +167,9 @@ All colors, typography, spacing, radii, padding, opacity and animation timings
 come from the centralized theme system. Components contain no hardcoded theme
 values.
 
-Open the theme switcher from the palette icon in the bar. Themes apply live and
-the selection is persisted under Quickshell's per-shell state directory.
+Open the control center from the sliders icon in the bar, then choose a theme in
+the Theme section. Themes apply live and the selection is persisted under
+Quickshell's per-shell state directory.
 
 Custom themes are JSON files dropped into `themes/custom/`. See
 [`docs/THEMING.md`](docs/THEMING.md) for the schema and validation rules.
@@ -132,8 +187,8 @@ be launched manually as a fallback. See [`docs/SESSION.md`](docs/SESSION.md) for
 the exact changes and rollback commands.
 
 This shell now owns the StatusNotifier watcher, so the system tray is populated.
-A temporary static wallpaper layer replaces Noctalia's wallpaper surface until
-the wallpaper module is implemented in Milestone 6.
+A static wallpaper layer replaces Noctalia's wallpaper surface. Wallpaper
+selection is available in the control center and persists in Quickshell state.
 
 ## Hyprland keybindings
 
@@ -165,8 +220,8 @@ remain active, as do the playerctl media keys.
   only enumerates Wi-Fi devices in this build.
 - The lock action uses `loginctl lock-session`. A session locker must be
   installed/configured separately (not part of this milestone).
-- The wallpaper is a temporary static image surface, not the Milestone 6
-  wallpaper selector.
+- The wallpaper is rendered by a dedicated background layer; the control center
+  provides the selector and persists the chosen path.
 - The installed `noctalia-qs` binary warns that it was built against Qt 6.11.2
   while the system provides Qt 6.12.0. It currently loads and runs, but the
   package should be rebuilt.

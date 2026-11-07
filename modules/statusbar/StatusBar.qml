@@ -41,6 +41,22 @@ PanelWindow {
         item: bar
     }
 
+    function updateGroupParent() {
+        const slot = Config.Settings.barControlCenterPosition === "left"
+            ? leftSection.groupSlot : rightSection.groupSlot;
+        controlCenterGroup.parent = slot;
+        Qt.callLater(barController.reanchorControlCenter);
+    }
+
+    Connections {
+        target: Config.Settings
+        function onBarControlCenterPositionChanged() {
+            updateGroupParent();
+        }
+    }
+
+    Component.onCompleted: updateGroupParent()
+
     readonly property int barWidth: Math.max(200, Math.min(
         Math.round(root.width * Math.max(1, Math.min(100, Config.Settings.barWidthPercent)) / 100),
         root.width - 2 * Config.Settings.edgeGap))
@@ -64,8 +80,54 @@ PanelWindow {
             onClicked: Services.UiState.dismissAll()
         }
 
+        Item {
+            id: networkAnchor
+            opacity: 0
+            width: 0
+            height: 0
+        }
+
+        Item {
+            id: bluetoothAnchor
+            opacity: 0
+            width: 0
+            height: 0
+        }
+
+        Item {
+            id: audioAnchor
+            opacity: 0
+            width: 0
+            height: 0
+        }
+
+        Item {
+            id: powerAnchor
+            opacity: 0
+            width: 0
+            height: 0
+        }
+
+        Item {
+            id: controlCenterAnchor
+            opacity: 0
+            width: 0
+            height: 0
+        }
+
+        BarController {
+            id: barController
+            screenInfo: root.screen
+            networkAnchor: networkAnchor
+            bluetoothAnchor: bluetoothAnchor
+            audioAnchor: audioAnchor
+            powerAnchor: powerAnchor
+            controlCenterAnchor: controlCenterAnchor
+        }
+
         LeftSection {
             id: leftSection
+            controller: barController
             anchors.left: parent.left
             anchors.leftMargin: Theme.spacing.lg
             anchors.verticalCenter: parent.verticalCenter
@@ -77,10 +139,15 @@ PanelWindow {
 
         RightSection {
             id: rightSection
-            screenInfo: root.screen
+            controller: barController
             anchors.right: parent.right
             anchors.rightMargin: Theme.spacing.lg
             anchors.verticalCenter: parent.verticalCenter
+        }
+
+        ControlCenterGroup {
+            id: controlCenterGroup
+            controller: barController
         }
     }
 }

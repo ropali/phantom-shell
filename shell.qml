@@ -3,6 +3,8 @@ import Quickshell
 import "components"
 import "modules/statusbar"
 import "modules/wallpaper"
+import "modules/nightlight"
+import "modules/controlcenter"
 
 ShellRoot {
     Variants {
@@ -14,6 +16,18 @@ ShellRoot {
             }
         }
     }
+
+    Variants {
+        model: Quickshell.screens
+
+        delegate: Component {
+            NightLightOverlay {
+                screen: modelData
+            }
+        }
+    }
+
+    ControlCenterKeys {}
 
     Variants {
         model: Quickshell.screens

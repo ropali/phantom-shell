@@ -70,7 +70,8 @@ surface using `config/Settings.qml -> wallpaperPath`, currently:
 $HOME/Pictures/wallpapers/Gruv/stairs.jpg
 ```
 
-This is a bridge until the Milestone 6 wallpaper selector exists.
+The control center now provides the wallpaper selector; the background layer
+renders the selected path.
 
 ## Starting and stopping manually
 

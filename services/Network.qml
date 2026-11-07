@@ -193,6 +193,16 @@ Singleton {
         return result;
     }
 
+
+    readonly property var connectedWifiNetwork: {
+        const list = networkList;
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].connected)
+                return list[i];
+        }
+        return null;
+    }
+
     function isOpenNetwork(network) {
         return network && network.security === WifiSecurityType.Open;
     }

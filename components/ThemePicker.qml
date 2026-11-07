@@ -1,22 +1,11 @@
 import QtQuick
-import "../../themes"
-import "../../components" as Components
+import "../themes"
 
-Components.Popup {
+Column {
     id: root
 
-    popupWidth: 300
-    padding: Theme.padding
-    spacing: Theme.spacing.md
-
-    Text {
-        width: parent.width
-        text: "Theme"
-        color: Theme.foreground
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
-        font.weight: Theme.fontWeightBold
-    }
+    width: parent ? parent.width : 300
+    spacing: 2
 
     Repeater {
         model: ThemeManager.availableThemes
@@ -27,8 +16,8 @@ Components.Popup {
 
             readonly property bool active: ThemeManager.activeThemeId === modelData.id
 
-            width: root.popupWidth - root.padding * 2
-            height: Theme.controlHeight + Theme.spacing.sm
+            width: root.width
+            height: Theme.controlHeight
             radius: Theme.radiusSmall
             color: active ? Theme.surfaceElevated
                 : themeMouse.containsMouse ? Theme.surface
@@ -38,13 +27,13 @@ Components.Popup {
 
             Row {
                 anchors.left: parent.left
-                anchors.leftMargin: Theme.spacing.md
+                anchors.leftMargin: Theme.spacing.sm
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Theme.spacing.sm
 
                 Row {
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: Theme.spacing.xs
+                    spacing: 2
 
                     Repeater {
                         model: [
@@ -57,9 +46,9 @@ Components.Popup {
 
                         delegate: Rectangle {
                             required property var modelData
-                            width: Theme.spacing.lg
-                            height: Theme.spacing.lg
-                            radius: Theme.spacing.xs
+                            width: Theme.spacing.md
+                            height: Theme.spacing.md
+                            radius: 2
                             color: modelData
                             border.width: Theme.borderWidth
                             border.color: Theme.border
@@ -79,7 +68,7 @@ Components.Popup {
 
             Text {
                 anchors.right: parent.right
-                anchors.rightMargin: Theme.spacing.md
+                anchors.rightMargin: Theme.spacing.sm
                 anchors.verticalCenter: parent.verticalCenter
                 visible: themeRow.active
                 text: "\uf00c"
@@ -96,23 +85,5 @@ Components.Popup {
                 onClicked: ThemeManager.applyTheme(themeRow.modelData.id)
             }
         }
-    }
-
-    Text {
-        width: parent.width
-        visible: ThemeManager.availableThemes.length === 0
-        text: "No themes found"
-        color: Theme.mutedForeground
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSizeSmall
-    }
-
-    Text {
-        width: parent.width
-        text: "Add custom themes to themes/custom/*.json"
-        color: Theme.mutedForeground
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSizeTiny
-        wrapMode: Text.WordWrap
     }
 }

@@ -45,8 +45,8 @@ Observed:
   `namespace: phantom-bar`, full-width surface, bar height 34 + 4 margin.
 - Bar renders on the monitor (screenshot taken with `grim`).
 - Popup components were additionally rendered in a copied config with
-  `shown: true` to validate their layout: calendar, network, Bluetooth, audio, theme switcher and power menu
-  and theme switcher all rendered.
+  `shown: true` to validate their layout: calendar, network, Bluetooth, audio,
+  power menu and control center all rendered.
 - Quickshell services reported live state after the shell loaded:
   audio sink present, Wi-Fi/network connected, 5 Bluetooth devices, 1 tray item,
   workspaces `1,2`, focused workspace `2`.
@@ -107,11 +107,11 @@ Run in a copy of the project to avoid disturbing the live session:
 |---|---|
 | Load all bundled themes | 6 themes discovered: catppuccin-mocha, dracula, gruvbox, nord, rose-pine, tokyo-night |
 | Switch theme live | `applyTheme("tokyo-night")` changed `Theme.background` from `#282828` to `#1a1b26` and `Theme.primary` from `#b8bb26` to `#7aa2f7` without restart |
-| All existing modules update | Bar, workspace indicator, popup surfaces and theme switcher re-rendered with the Tokyo Night palette |
+| All existing modules update | Bar, workspace indicator, popup surfaces and the control center theme picker re-rendered with the Tokyo Night palette |
 | Persistence across restart | State file contained `{"theme":"tokyo-night"}`; a fresh process restored Tokyo Night before any switch |
 | Invalid theme | A malformed JSON file was rejected with a logged reason; the previous valid theme stayed active |
 | Custom theme discovery | Dropping `themes/custom/my-custom.json` produced 7 themes with no QML changes |
-| Theme switcher UI | Renders names, five-color previews, active highlight and custom-theme hint |
+| Theme picker UI | Control center renders names, five-color previews and active highlight |
 | Duplicate windows / state reset | No duplicated bar or popups observed during live switching |
 
 Theme persistence location:
@@ -181,12 +181,48 @@ exact command verified manually, and both edited Lua files pass `luac -p`.
 - Noctalia's launcher, control center, settings panel, OSD and annotation/lock
   IPC are inactive. Their existing keybindings only work in the manual Noctalia
   fallback session.
-- The desktop wallpaper is a temporary static Quickshell background layer with
-  `Settings.wallpaperPath`; the wallpaper selector arrives in Milestone 6.
+- The desktop wallpaper is a dedicated Quickshell background layer driven by
+  `Settings.wallpaperPath`; the control center wallpaper picker updates it and
+  persists the path.
+- Brightness requires a `backlight` device; this desktop exposes none, so the
+  control center disables the slider and shows "Unavailable".
+- Night light is a click-through warm overlay, not a gamma/ICC adjustment.
+- UPower reports no display battery on this desktop, so the control center shows
+  `AC power`.
 - `loginctl lock-session` emits a standard lock request but no locker is
   installed on this system.
-- Clicking, scrolling and keyboard acceptance were not automated on Wayland.
-  These require the user's final behavioral testing.
+- General clicking and scrolling were not automated on Wayland; Escape in a
+  control center detail view was verified with an injected key event.
+
+## Control center validation (Milestone 3)
+
+| Test | Result |
+|---|---|
+| Open control center | Sliders button opens the vertical dashboard; only its icon is highlighted |
+| Overview layout | Profile header, quick toggles, audio/input sliders, brightness/night light, system card, theme/wallpaper tiles and media card render without long lists |
+| Quick toggles | Wi-Fi, Bluetooth, DND and Night Light tiles reflect service state; clicking a tile toggles it |
+| Quick toggle details | The chevron on each quick tile opens the matching detail view |
+| Audio overview | Output and input sliders show device names and volume; input falls back to "No input device" when no source exists |
+| Brightness | Shows "Unavailable" and a disabled slider because this desktop has no `backlight` device |
+| System card | Shows `AC power` / `No battery detected`; network, Bluetooth and power-profile chips open their detail views |
+| Appearance | Theme and wallpaper tiles show the current selections and open their selectors |
+| Media card | Shows the now-playing MPRIS track or a `Nothing playing` placeholder |
+| Wi-Fi detail | Opens the shared `NetworkPanel`; unknown WPA networks still emit the password request |
+| Bluetooth detail | Opens the shared `BluetoothPanel`; paired devices show Connect/Disconnect actions |
+| Audio detail | Opens the shared `AudioPanel` with output/input selection |
+| Theme detail | Theme selector updates the whole shell |
+| Wallpaper detail | Preview and wallpaper grid; a test selection persisted and was restored |
+| Power/battery detail | Power-profile selector and battery information open from the system card |
+| Night Light detail | Temperature configuration opens; the overlay is click-through |
+| Detail navigation | Back header returns to the overview; Escape closes the active detail |
+| Single detail | Only one detail view can be active; opening another card replaces it |
+| Shared implementation | Status bar popups and control center details use the same NetworkPanel, BluetoothPanel and AudioPanel components |
+| View loading | All detail views were cycled at runtime without QML errors |
+| Persistence | Theme state persists; wallpaper path is written to `Quickshell.statePath("wallpaper.json")` |
+
+Note: Escape was verified with an injected keyboard event while the control
+center keyboard-focus layer was active. The overview has no scroll view; detail
+views own their single scroll area.
 
 ## User acceptance checklist
 
@@ -197,5 +233,5 @@ exact command verified manually, and both edited Lua files pass `luac -p`.
 5. Click network, Bluetooth and audio icons; exercise toggles and device rows.
 6. Right-click a tray applet and exercise its context menu.
 7. Open the power menu; verify each action on a safe session.
-8. Open the theme switcher; switch themes; restart Quickshell and confirm the
-   choice persists.
+8. Open the control center; switch themes, choose a wallpaper, and restart
+   Quickshell to confirm persistence.

@@ -19,7 +19,7 @@ Everything below was already present on the system.
 
 | Item | Reason | Feature | Mandatory |
 |---|---|---|---|
-| Fonts: `JetBrainsMono Nerd Font` | All icon glyphs and text use the Nerd Font family | Bar, popups, theme switcher | Yes for the bundled themes |
+| Fonts: `JetBrainsMono Nerd Font` | All icon glyphs and text use the Nerd Font family | Bar, popups, control center | Yes for the bundled themes |
 | A session locker handling `loginctl lock-session` | The power menu's Lock action emits the standard lock request | Lock screen | No |
 | `docs/THEMING.md` external hook command | Optional script for Hyprland borders, GTK/Qt themes, icons or wallpaper | External theme sync | No |
 
