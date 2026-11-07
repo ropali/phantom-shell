@@ -1,0 +1,66 @@
+{
+  "id": "catppuccin-mocha",
+  "name": "Catppuccin Mocha",
+  "colors": {
+    "background": "#1e1e2e",
+    "surface": "#313244",
+    "surfaceElevated": "#45475a",
+    "primary": "#cba6f7",
+    "secondary": "#89b4fa",
+    "tertiary": "#94e2d5",
+    "foreground": "#cdd6f4",
+    "mutedForeground": "#a6adc8",
+    "disabled": "#585b70",
+    "border": "#45475a",
+    "success": "#a6e3a1",
+    "warning": "#f9e2af",
+    "error": "#f38ba8",
+    "info": "#89dceb",
+    "onPrimary": "#1e1e2e",
+    "onSecondary": "#1e1e2e",
+    "onTertiary": "#1e1e2e"
+  },
+  "typography": {
+    "fontFamily": "JetBrainsMono Nerd Font",
+    "iconFontFamily": "JetBrainsMono Nerd Font",
+    "sizeTiny": 9,
+    "sizeSmall": 10,
+    "sizeBase": 11,
+    "sizeMedium": 12,
+    "size": 13,
+    "sizeLarge": 16,
+    "sizeXLarge": 20,
+    "weightNormal": 400,
+    "weightMedium": 500,
+    "weightBold": 700,
+    "lineHeight": 1.3
+  },
+  "spacing": {
+    "xs": 2,
+    "sm": 4,
+    "md": 8,
+    "lg": 12,
+    "xl": 16
+  },
+  "components": {
+    "radius": 12,
+    "radiusSmall": 7,
+    "radiusLarge": 18,
+    "borderWidth": 1,
+    "padding": 12,
+    "opacity": 0.94,
+    "buttonSize": 26,
+    "iconSize": 15,
+    "trayIconSize": 16,
+    "workspaceButtonSize": 24,
+    "controlHeight": 34,
+    "rowHeight": 30,
+    "shadow": true
+  },
+  "animation": {
+    "fast": 120,
+    "normal": 200,
+    "slow": 300,
+    "easing": "OutCubic"
+  }
+}

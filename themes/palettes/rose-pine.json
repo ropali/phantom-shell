@@ -1,0 +1,66 @@
+{
+  "id": "rose-pine",
+  "name": "Rosé Pine",
+  "colors": {
+    "background": "#191724",
+    "surface": "#1f1d2e",
+    "surfaceElevated": "#26233a",
+    "primary": "#c4a7e7",
+    "secondary": "#9ccfd8",
+    "tertiary": "#ebbcba",
+    "foreground": "#e0def4",
+    "mutedForeground": "#908caa",
+    "disabled": "#524f67",
+    "border": "#403d52",
+    "success": "#31748f",
+    "warning": "#f6c177",
+    "error": "#eb6f92",
+    "info": "#9ccfd8",
+    "onPrimary": "#191724",
+    "onSecondary": "#191724",
+    "onTertiary": "#191724"
+  },
+  "typography": {
+    "fontFamily": "JetBrainsMono Nerd Font",
+    "iconFontFamily": "JetBrainsMono Nerd Font",
+    "sizeTiny": 9,
+    "sizeSmall": 10,
+    "sizeBase": 11,
+    "sizeMedium": 12,
+    "size": 13,
+    "sizeLarge": 16,
+    "sizeXLarge": 20,
+    "weightNormal": 400,
+    "weightMedium": 500,
+    "weightBold": 700,
+    "lineHeight": 1.3
+  },
+  "spacing": {
+    "xs": 2,
+    "sm": 4,
+    "md": 8,
+    "lg": 12,
+    "xl": 16
+  },
+  "components": {
+    "radius": 12,
+    "radiusSmall": 7,
+    "radiusLarge": 18,
+    "borderWidth": 1,
+    "padding": 12,
+    "opacity": 0.94,
+    "buttonSize": 26,
+    "iconSize": 15,
+    "trayIconSize": 16,
+    "workspaceButtonSize": 24,
+    "controlHeight": 34,
+    "rowHeight": 30,
+    "shadow": true
+  },
+  "animation": {
+    "fast": 120,
+    "normal": 200,
+    "slow": 300,
+    "easing": "OutCubic"
+  }
+}

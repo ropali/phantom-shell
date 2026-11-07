@@ -1,0 +1,40 @@
+# Runtime logs and crash dumps
+*.log
+*.qslog
+core
+core.*
+
+# Editor and OS noise
+.DS_Store
+.directory
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Backup and patch leftovers
+*.bak
+*.bak-*
+*.orig
+*.rej
+
+# Python helper caches
+__pycache__/
+*.pyc
+
+# Build and packaging output
+build/
+dist/
+pkg/
+*.pkg.tar.*
+*.src.tar.*
+
+# User-specific custom themes (bundled palettes live in themes/palettes)
+themes/custom/*.json
+!themes/custom/.gitkeep
+
+# Local environment/secrets
+.env
+.env.*
+*.secret
