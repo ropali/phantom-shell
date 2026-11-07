@@ -1,7 +1,5 @@
 import QtQuick
-import Quickshell
-import Quickshell.Services.SystemTray as Tray
-import "../../config" as Config
+import "../../services" as Services
 import "../../themes"
 
 Row {
@@ -11,7 +9,7 @@ Row {
 
     Repeater {
         id: repeater
-        model: Tray.SystemTray.items
+        model: Services.SystemTray.items
 
         delegate: Item {
             id: trayItem

@@ -1,5 +1,5 @@
 import QtQuick
-import Quickshell
+import "../../services" as Services
 import "../../components" as Components
 import "../../themes"
 
@@ -10,26 +10,7 @@ Components.Popup {
     padding: Theme.padding
     spacing: Theme.spacing.xs
 
-    readonly property var actions: [
-        { label: "Lock screen", icon: "\uf023", action: "lock" },
-        { label: "Logout", icon: "\uf2f5", action: "logout" },
-        { label: "Suspend", icon: "\uf186", action: "suspend" },
-        { label: "Reboot", icon: "\uf021", action: "reboot" },
-        { label: "Shutdown", icon: "\uf011", action: "shutdown" }
-    ]
-
-    function run(action) {
-        if (action === "lock")
-            Quickshell.execDetached(["loginctl", "lock-session"]);
-        else if (action === "logout")
-            Quickshell.execDetached(["hyprctl", "dispatch", "exit"]);
-        else if (action === "suspend")
-            Quickshell.execDetached(["systemctl", "suspend"]);
-        else if (action === "reboot")
-            Quickshell.execDetached(["systemctl", "reboot"]);
-        else if (action === "shutdown")
-            Quickshell.execDetached(["systemctl", "poweroff"]);
-    }
+    readonly property var actions: Services.Session.actions
 
     Repeater {
         model: root.actions
@@ -42,7 +23,7 @@ Components.Popup {
             height: Theme.controlHeight
             radius: Theme.radiusSmall
             color: actionMouse.containsMouse
-                ? (modelData.action === "shutdown" || modelData.action === "reboot" ? Theme.surfaceElevated : Theme.surface)
+                ? (modelData.destructive ? Theme.surfaceElevated : Theme.surface)
                 : "transparent"
 
             Row {
@@ -54,8 +35,7 @@ Components.Popup {
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: actionRow.modelData.icon
-                    color: actionRow.modelData.action === "shutdown" || actionRow.modelData.action === "reboot"
-                        ? Theme.error : Theme.mutedForeground
+                    color: actionRow.modelData.destructive ? Theme.error : Theme.mutedForeground
                     font.family: Theme.iconFontFamily
                     font.pixelSize: Theme.fontSize
                 }
@@ -63,8 +43,7 @@ Components.Popup {
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: actionRow.modelData.label
-                    color: actionRow.modelData.action === "shutdown" || actionRow.modelData.action === "reboot"
-                        ? Theme.error : Theme.foreground
+                    color: actionRow.modelData.destructive ? Theme.error : Theme.foreground
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSizeMedium
                 }
@@ -77,7 +56,7 @@ Components.Popup {
                 cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     root.shown = false;
-                    root.run(actionRow.modelData.action);
+                    Services.Session.run(actionRow.modelData.id);
                 }
             }
         }

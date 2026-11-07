@@ -3,10 +3,11 @@
 Phantom is a modular Quickshell desktop shell for CachyOS + Hyprland + Wayland,
 built as an incremental replacement for Noctalia and intended to become a standalone project.
 
-This repository currently implements **Milestone 0** (environment preparation)
-and **Milestone 1** (status bar), plus the mandatory **global theming system**.
-It is intended to become a standalone project called Phantom; the extraction and
-packaging plan is in [`docs/STANDALONE.md`](docs/STANDALONE.md).
+This repository implements **Milestone 0** (environment preparation),
+**Milestone 1** (status bar) and **Milestone 2** (shared shell services), plus
+the mandatory **global theming system**. It is intended to become a standalone
+project called Phantom; the extraction and packaging plan is in
+[`docs/STANDALONE.md`](docs/STANDALONE.md).
 
 ## Requirements
 
@@ -37,7 +38,7 @@ to inspect the most recent run.
 ## Project layout
 
 ```text
-quickshell/
+phantom-shell/
 ├── shell.qml
 ├── config/
 │   └── Settings.qml          # layout preferences, not visual tokens
@@ -54,7 +55,9 @@ quickshell/
 │   ├── Network.qml
 │   ├── Bluetooth.qml
 │   ├── Notifications.qml
-│   └── SystemTray.qml
+│   ├── Session.qml
+│   ├── SystemTray.qml
+│   └── UiState.qml
 ├── modules/
 │   ├── statusbar/            # bar, sections, calendar, tray, power menu
 │   ├── theme/ThemeSwitcher.qml
@@ -67,12 +70,20 @@ quickshell/
 ├── docs/
 │   ├── CONFIGURATION.md
 │   ├── PACKAGES.md
+│   ├── SERVICES.md
 │   ├── SESSION.md
 │   ├── STANDALONE.md
 │   ├── TESTING.md
 │   └── THEMING.md
 └── assets/
 ```
+
+## Shared services
+
+All system integrations live in [`services/`](services/) and are documented in
+[`docs/SERVICES.md`](docs/SERVICES.md). Panels read reactive service properties
+and call service methods; they do not run `hyprctl`, `nmcli`, `wpctl`,
+`systemctl` or other integration commands themselves.
 
 ## Status bar
 

@@ -593,7 +593,7 @@ UI components must not independently implement system integrations.
 
 ## Milestone 3: Control center
 
-Create a dedicated quick-settings panel. Though some of these already have their own dedicated buttons so keep them as it is but add those option in here as well.
+Create a dedicated quick-settings panel. Though some of these already have their own dedicated buttons so keep them as it is(except theme switcher, move it to control center) but add those option in here as well.
 
 Features:
 

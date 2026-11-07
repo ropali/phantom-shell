@@ -94,9 +94,9 @@ Notes:
 | Audio indicator | Reflects sink volume and mute state | Runtime tested (service data) |
 | Tray applet | Tray service returns items | Verified: 1 Steam item |
 | Tray applet menu | Right-clicking a tray icon opens its DBusMenu; entries trigger actions and submenus navigate in-place | Menu rendered and verified with the Steam applet; right-click path shares the working popup code |
-| Power menu | Opens; actions call `loginctl`, `hyprctl`, `systemctl` | Popup rendered; actions not executed |
+| Power menu | Opens; actions are defined and executed by `services/Session.qml` | Popup rendered; actions not executed |
 | Multiple monitors | One `StatusBar` instance per `Quickshell.screens` entry | Code path implemented; only one monitor available |
-| Bar width percentage | `barWidthPercent: 80` produces a 2048px bar on a 2560px monitor, centered at x=256 | Verified from runtime geometry |
+| Bar width percentage | Configured `barWidthPercent` produces the expected centered bar width | Verified from runtime geometry |
 | Bar/window gap | `barWindowGap: 4` leaves a 4px visible gap below the bar; Hyprland `gaps_out` is compensated | Verified with tiled window at y=42 and bar bottom at 38 |
 
 ## Theming validation
@@ -120,6 +120,26 @@ Theme persistence location:
 Quickshell.statePath("theme.json")
 # e.g. $HOME/.local/state/noctalia-qs/by-shell/<shell-id>/theme.json
 ```
+
+## Shared services validation (Milestone 2)
+
+| Test | Result |
+|---|---|
+| Service boundary | `modules/`, `components/`, `config/` and `themes/` contain no direct `hyprctl`, `nmcli`, `wpctl`, `brightnessctl`, `systemctl`, `loginctl` or `Quickshell.execDetached` calls | Grep-checked; the only remaining `execDetached` use is the documented external theme hook in `ThemeManager` |
+| Tray service | The tray UI reads `Services.SystemTray.items` rather than importing the Quickshell tray module | Code inspected |
+| Workspace service | Workspace IDs and lookup live in `Hyprland.workspaceIds()` and `workspaceById()` | Code inspected |
+| Session service | Power menu labels, icons and destructive styling come from `Session.actions`; execution goes through `Session.run()` | Popup rendered |
+| Notification state | `Notifications` exposes DND, history, count and clear/dismiss methods | Service loaded; no daemon until Milestone 4 |
+| Load after refactor | No QML errors or missing imports after restart | Runtime tested |
+
+Verification command:
+
+```bash
+grep -rn "Quickshell.execDetached\|hyprctl\|nmcli\|wpctl\|brightnessctl\|systemctl\|loginctl\|bluetoothctl" \
+  modules components config themes
+```
+
+Expected output is only the documented theme hook in `themes/ThemeManager.qml`.
 
 ## Session integration validation
 

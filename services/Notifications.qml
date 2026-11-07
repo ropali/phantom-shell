@@ -2,12 +2,30 @@ pragma Singleton
 import Quickshell
 
 Singleton {
-    // Milestone 1 only tracks the local Do Not Disturb preference.
-    // The notification daemon and history arrive in Milestone 4.
+    // Milestone 2 exposes the shared notification state used by the bar.
+    // The notification daemon, actions and grouping arrive in Milestone 4.
     property bool doNotDisturb: false
-    property int count: 0
+    property var history: []
+
+    readonly property int count: history.length
+    readonly property bool daemonAvailable: false
 
     function toggleDnd() {
         doNotDisturb = !doNotDisturb;
+    }
+
+    function clearAll() {
+        history = [];
+    }
+
+    function dismiss(notification) {
+        if (!notification)
+            return;
+        const index = history.indexOf(notification);
+        if (index < 0)
+            return;
+        const next = history.slice();
+        next.splice(index, 1);
+        history = next;
     }
 }
