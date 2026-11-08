@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import "../../themes"
+import "../../config" as Config
 import "../../services" as Services
 import "../../components" as Components
 
@@ -10,6 +11,8 @@ Components.Popup {
     popupWidth: 440
     padding: Theme.padding
     spacing: 0
+    alignRight: Config.Settings.barStyle === "pills"
+        || Config.Settings.barControlCenterPosition === "right"
 
     property string detailId: ""
     property bool reanchoring: false

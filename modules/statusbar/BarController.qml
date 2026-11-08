@@ -15,11 +15,6 @@ Item {
     property var audioButton: null
     property var powerButton: null
     property var powerMenuAnchor: null
-    property var networkAnchor: null
-    property var bluetoothAnchor: null
-    property var audioAnchor: null
-    property var powerAnchor: null
-    property var controlCenterAnchor: null
 
     function togglePopup(popup) {
         const wasOpen = popup.shown;
@@ -28,20 +23,18 @@ Item {
     }
 
     function registerButton(id, item) {
-        if (id === "controlCenter")
+        if (id === "controlCenter") {
             controller.controlCenterButton = item;
-        else if (id === "network")
+            Qt.callLater(controller.reanchorControlCenter);
+        } else if (id === "network") {
             controller.networkButton = item;
-        else if (id === "bluetooth")
+        } else if (id === "bluetooth") {
             controller.bluetoothButton = item;
-        else if (id === "audio")
+        } else if (id === "audio") {
             controller.audioButton = item;
-        else if (id === "power")
+        } else if (id === "power") {
             controller.powerButton = item;
-        else
-            return;
-
-        Qt.callLater(controller.updateAnchors);
+        }
     }
 
     function unregisterButton(id, item) {
@@ -57,39 +50,15 @@ Item {
             controller.powerButton = null;
     }
 
-    function updateAnchor(button, anchor) {
-        const bar = controller.parent;
-        if (!button || !anchor || !bar)
-            return;
-
-        const pos = button.mapToItem(bar, 0, 0);
-        anchor.x = pos.x;
-        anchor.y = pos.y;
-        anchor.width = button.width;
-        anchor.height = button.height;
-    }
-
-    function updateAnchors() {
-        controller.updateAnchor(controller.networkButton, controller.networkAnchor);
-        controller.updateAnchor(controller.bluetoothButton, controller.bluetoothAnchor);
-        controller.updateAnchor(controller.audioButton, controller.audioAnchor);
-        controller.updateAnchor(controller.powerButton, controller.powerAnchor);
-        controller.updateAnchor(controller.controlCenterButton, controller.controlCenterAnchor);
-    }
-
-    function updateControlCenterAnchor(reanchor) {
-        controller.updateAnchors();
-
-        if (reanchor && controlCenter.shown) {
-            controlCenter.reanchoring = true;
-            controlCenter.shown = false;
-            reanchorTimer.detail = controlCenter.detailId;
-            reanchorTimer.restart();
-        }
-    }
-
     function reanchorControlCenter() {
-        controller.updateControlCenterAnchor(true);
+        if (reanchorTimer.running || controlCenter.reanchoring)
+            return;
+        if (!controlCenter.shown)
+            return;
+        controlCenter.reanchoring = true;
+        reanchorTimer.detail = controlCenter.detailId;
+        controlCenter.shown = false;
+        reanchorTimer.restart();
     }
 
     Timer {
@@ -137,14 +106,14 @@ Item {
 
     function togglePowerMenu(fromControlCenter) {
         controller.powerMenuAnchor = fromControlCenter
-            ? controller.controlCenterAnchor
-            : (controller.powerButton ? controller.powerAnchor : controller.controlCenterAnchor);
+            ? controller.controlCenterButton
+            : (controller.powerButton || controller.controlCenterButton);
         controller.togglePopup(powerMenu);
     }
 
     NetworkPopup {
         id: networkPopup
-        anchorItem: controller.networkAnchor
+        anchorItem: controller.networkButton
         onPasswordRequired: (network) => {
             networkPopup.shown = false;
             wifiPasswordDialog.network = network;
@@ -160,12 +129,12 @@ Item {
 
     BluetoothPopup {
         id: bluetoothPopup
-        anchorItem: controller.bluetoothAnchor
+        anchorItem: controller.bluetoothButton
     }
 
     AudioPopup {
         id: audioPopup
-        anchorItem: controller.audioAnchor
+        anchorItem: controller.audioButton
     }
 
     PowerMenu {
@@ -175,7 +144,7 @@ Item {
 
     ControlCenter {
         id: controlCenter
-        anchorItem: controller.controlCenterAnchor
+        anchorItem: controller.controlCenterButton
         onPasswordRequired: (network) => {
             controlCenter.shown = false;
             wifiPasswordDialog.network = network;

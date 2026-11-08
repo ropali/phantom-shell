@@ -1,205 +1,299 @@
 import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import "../../components" as Components
 import "../../themes"
+import "../../services" as Services
 
 Components.Popup {
     id: root
 
-    popupWidth: 300
+    popupWidth: 440
     padding: Theme.padding
     spacing: Theme.spacing.md
 
-    property date today: new Date()
+    property date selectedDate: new Date()
     property int viewYear: new Date().getFullYear()
     property int viewMonth: new Date().getMonth()
-    property date selectedDate: new Date()
 
-    readonly property var monthNames: [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ]
-    readonly property var weekdayNames: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
+    readonly property date today: clock.date
+    readonly property int contentWidth: popupWidth - padding * 2
+    readonly property int cellGap: 2
+    readonly property int cellWidth: Math.floor((contentWidth - cellGap * 6) / 7)
+    readonly property int cellHeight: 36
 
-    readonly property int daysInMonth: new Date(viewYear, viewMonth + 1, 0).getDate()
     readonly property int firstWeekday: (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7
-    readonly property int cellCount: Math.ceil((firstWeekday + daysInMonth) / 7) * 7
+    readonly property int daysInMonth: new Date(viewYear, viewMonth + 1, 0).getDate()
+    readonly property string monthTitle: Qt.formatDateTime(new Date(viewYear, viewMonth, 1), "MMMM yyyy")
+    readonly property int weekNumber: {
+        if (selectedDate.getFullYear() === viewYear && selectedDate.getMonth() === viewMonth)
+            return isoWeek(selectedDate);
+        return isoWeek(new Date(viewYear, viewMonth, 1));
+    }
+    readonly property string timeText: Qt.formatDateTime(clock.date, "HH:mm")
+    readonly property string secondsText: Qt.formatDateTime(clock.date, "ss")
+    readonly property string longDateText: Qt.formatDateTime(clock.date, "dddd, MMMM d, yyyy")
 
-    onShownChanged: {
-        if (shown) {
-            today = new Date();
-            viewYear = today.getFullYear();
-            viewMonth = today.getMonth();
+    readonly property var weekdayNames: {
+        const result = [];
+        for (let i = 0; i < 7; i++)
+            result.push(Qt.formatDateTime(new Date(2024, 0, 1 + i), "ddd"));
+        return result;
+    }
+
+    SystemClock {
+        id: clock
+        enabled: true
+        precision: SystemClock.Seconds
+    }
+
+    Connections {
+        target: root
+        function onShownChanged() {
+            if (!root.shown)
+                return;
+            root.viewYear = clock.date.getFullYear();
+            root.viewMonth = clock.date.getMonth();
+            root.selectedDate = new Date(
+                clock.date.getFullYear(), clock.date.getMonth(), clock.date.getDate());
+            Services.Weather.refresh();
         }
     }
 
-    Timer {
-        interval: 60000
-        running: true
-        repeat: true
-        onTriggered: root.today = new Date()
+    function isoWeek(date) {
+        const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const day = (d.getDay() + 6) % 7;
+        d.setDate(d.getDate() - day + 3);
+        const firstThursday = new Date(d.getFullYear(), 0, 4);
+        const firstDay = (firstThursday.getDay() + 6) % 7;
+        firstThursday.setDate(firstThursday.getDate() - firstDay + 3);
+        return 1 + Math.round((d.getTime() - firstThursday.getTime()) / 604800000);
     }
 
-    Row {
+    function sameDay(a, b) {
+        return a.getFullYear() === b.getFullYear()
+            && a.getMonth() === b.getMonth()
+            && a.getDate() === b.getDate();
+    }
+
+    function cellDate(index) {
+        return new Date(viewYear, viewMonth, 1 + index - firstWeekday);
+    }
+
+    function previousMonth() {
+        if (viewMonth === 0) {
+            viewMonth = 11;
+            viewYear--;
+        } else {
+            viewMonth--;
+        }
+    }
+
+    function nextMonth() {
+        if (viewMonth === 11) {
+            viewMonth = 0;
+            viewYear++;
+        } else {
+            viewMonth++;
+        }
+    }
+
+    function goToday() {
+        viewYear = clock.date.getFullYear();
+        viewMonth = clock.date.getMonth();
+        selectedDate = new Date(viewYear, viewMonth, clock.date.getDate());
+    }
+
+    function weatherColor() {
+        const text = (Services.Weather.condition || "").toLowerCase();
+        if (text.indexOf("rain") >= 0 || text.indexOf("drizzle") >= 0
+            || text.indexOf("shower") >= 0 || text.indexOf("snow") >= 0
+            || text.indexOf("sleet") >= 0)
+            return Theme.info;
+        if (text.indexOf("cloud") >= 0 || text.indexOf("overcast") >= 0
+            || text.indexOf("mist") >= 0 || text.indexOf("fog") >= 0)
+            return Theme.mutedForeground;
+        return Theme.warning;
+    }
+
+    RowLayout {
         width: parent.width
-        height: Theme.rowHeight - Theme.spacing.xs
+        spacing: Theme.spacing.md
 
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            width: Theme.rowHeight - Theme.spacing.xs
-            text: "\u2039"
-            color: previousMouse.containsMouse ? Theme.primary : Theme.mutedForeground
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSizeXLarge
-            horizontalAlignment: Text.AlignHCenter
+        Rectangle {
+            Layout.preferredWidth: 48
+            Layout.preferredHeight: 48
+            Layout.alignment: Qt.AlignVCenter
+            radius: Theme.radius
+            color: Theme.accentSurface
+            border.width: Theme.borderWidth
+            border.color: Theme.accentBorder
 
-            MouseArea {
-                id: previousMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    if (root.viewMonth === 0) {
-                        root.viewMonth = 11;
-                        root.viewYear--;
-                    } else {
-                        root.viewMonth--;
-                    }
-                }
+            Text {
+                anchors.centerIn: parent
+                text: "\uf017"
+                color: Theme.primary
+                font.family: Theme.iconFontFamily
+                font.pixelSize: Theme.fontSizeXLarge
             }
         }
 
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 56
-            text: root.monthNames[root.viewMonth] + " " + root.viewYear
-            color: Theme.foreground
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSize
-            font.weight: Theme.fontWeightBold
-            horizontalAlignment: Text.AlignHCenter
-        }
+        Column {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 2
 
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            width: Theme.rowHeight - Theme.spacing.xs
-            text: "\u203a"
-            color: nextMouse.containsMouse ? Theme.primary : Theme.mutedForeground
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSizeXLarge
-            horizontalAlignment: Text.AlignHCenter
+            Row {
+                spacing: Theme.spacing.xs
 
-            MouseArea {
-                id: nextMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    if (root.viewMonth === 11) {
-                        root.viewMonth = 0;
-                        root.viewYear++;
-                    } else {
-                        root.viewMonth++;
-                    }
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: root.timeText
+                    color: Theme.foreground
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSizeXLarge
+                    font.weight: Theme.fontWeightBold
                 }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: ":" + root.secondsText
+                    color: Theme.primary
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSizeLarge
+                    font.weight: Theme.fontWeightBold
+                }
+
             }
-        }
-    }
 
-    Row {
-        width: parent.width
-
-        Repeater {
-            model: root.weekdayNames
-
-            delegate: Text {
-                required property var modelData
-                width: parent.width / 7
-                text: modelData
+            Text {
+                width: parent.width
+                text: root.longDateText
                 color: Theme.mutedForeground
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSizeSmall
-                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
             }
         }
-    }
-
-    Grid {
-        width: parent.width
-        columns: 7
-
-        Repeater {
-            model: root.cellCount
-
-            delegate: Item {
-                id: cell
-                required property int index
-
-                readonly property int day: index - root.firstWeekday + 1
-                readonly property bool valid: day >= 1 && day <= root.daysInMonth
-                readonly property bool isToday: valid
-                    && day === root.today.getDate()
-                    && root.viewMonth === root.today.getMonth()
-                    && root.viewYear === root.today.getFullYear()
-                readonly property bool isSelected: valid
-                    && day === root.selectedDate.getDate()
-                    && root.viewMonth === root.selectedDate.getMonth()
-                    && root.viewYear === root.selectedDate.getFullYear()
-
-                width: (root.popupWidth - root.padding * 2) / 7
-                height: Theme.rowHeight
-
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: Theme.rowHeight - Theme.spacing.xs
-                    height: Theme.rowHeight - Theme.spacing.sm
-                    radius: Theme.radiusSmall
-                    color: cell.isSelected ? Theme.primary
-                        : cell.isToday ? Theme.surfaceElevated
-                        : cellMouse.containsMouse && cell.valid ? Theme.surface
-                        : "transparent"
-                    border.width: cell.isToday && !cell.isSelected ? 1 : 0
-                    border.color: Theme.primary
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: cell.valid ? cell.day : ""
-                        color: cell.isSelected ? Theme.onPrimary
-                            : cell.valid ? Theme.foreground : Theme.mutedForeground
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSizeBase
-                        font.weight: cell.isToday || cell.isSelected ? Theme.fontWeightBold : Theme.fontWeightNormal
-                    }
-                }
-
-                MouseArea {
-                    id: cellMouse
-                    anchors.fill: parent
-                    enabled: cell.valid
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.selectedDate = new Date(root.viewYear, root.viewMonth, cell.day)
-                }
-            }
-        }
-    }
-
-    Item {
-        width: parent.width
-        height: Theme.rowHeight
 
         Rectangle {
-            anchors.centerIn: parent
-            width: Theme.spacing.xl * 5
-            height: Theme.rowHeight - Theme.spacing.sm
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredWidth: 170
+            Layout.preferredHeight: 48
+            visible: Services.Weather.available || Services.Weather.lastError.length > 0
             radius: Theme.radiusSmall
-            color: todayMouse.containsMouse ? Theme.surfaceElevated : Theme.surface
+            color: Theme.surface
+            border.width: Theme.borderWidth
+            border.color: Theme.subtleBorder
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: Theme.spacing.sm
+                spacing: Theme.spacing.sm
+
+                Text {
+                    Layout.alignment: Qt.AlignVCenter
+                    text: Services.Weather.available ? Services.Weather.icon : "\uf0c2"
+                    color: Services.Weather.available ? root.weatherColor() : Theme.mutedForeground
+                    font.family: Theme.iconFontFamily
+                    font.pixelSize: Theme.fontSizeLarge
+                }
+
+                Column {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    spacing: 1
+
+                    Text {
+                        width: parent.width
+                        text: Services.Weather.available ? Services.Weather.location : "Weather"
+                        color: Theme.foreground
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeTiny
+                        font.weight: Theme.fontWeightBold
+                        elide: Text.ElideRight
+                    }
+
+                    Text {
+                        width: parent.width
+                        text: Services.Weather.available
+                            ? (Services.Weather.temperature + "°C · "
+                                + Services.Weather.condition + " · "
+                                + Services.Weather.humidity + "%")
+                            : "Unavailable"
+                        color: Theme.mutedForeground
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeTiny
+                        elide: Text.ElideRight
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        width: parent.width
+        height: Theme.borderWidth
+        color: Theme.subtleBorder
+    }
+
+    RowLayout {
+        width: parent.width
+        spacing: Theme.spacing.sm
+
+        Text {
+            Layout.alignment: Qt.AlignVCenter
+            text: root.monthTitle
+            color: Theme.foreground
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSizeMedium
+            font.weight: Theme.fontWeightBold
+        }
+
+        Rectangle {
+            Layout.alignment: Qt.AlignVCenter
+            width: weekLabel.implicitWidth + Theme.spacing.lg
+            height: Theme.spacing.xl + Theme.spacing.xs
+            radius: height / 2
+            color: Theme.accentSurface
+            border.width: Theme.borderWidth
+            border.color: Theme.accentBorder
+
+            Text {
+                id: weekLabel
+                anchors.centerIn: parent
+                text: "Week " + root.weekNumber
+                color: Theme.primary
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeTiny
+                font.weight: Theme.fontWeightBold
+            }
+        }
+
+        Item { Layout.fillWidth: true }
+
+        BarRoundButton {
+            icon: "\uf053"
+            tooltip: "Previous month"
+            onClicked: root.previousMonth()
+        }
+
+        Rectangle {
+            Layout.preferredWidth: 54
+            Layout.preferredHeight: 28
+            Layout.alignment: Qt.AlignVCenter
+            radius: Theme.radiusSmall
+            color: todayMouse.containsMouse ? Theme.surfaceElevated : Theme.accentSurface
+            border.width: Theme.borderWidth
+            border.color: Theme.accentBorder
 
             Text {
                 anchors.centerIn: parent
                 text: "Today"
-                color: Theme.foreground
+                color: Theme.primary
                 font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSizeBase
+                font.pixelSize: Theme.fontSizeSmall
+                font.weight: Theme.fontWeightBold
             }
 
             MouseArea {
@@ -207,13 +301,114 @@ Components.Popup {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    root.today = new Date();
-                    root.viewYear = root.today.getFullYear();
-                    root.viewMonth = root.today.getMonth();
-                    root.selectedDate = root.today;
+                onClicked: root.goToday()
+            }
+        }
+
+        BarRoundButton {
+            icon: "\uf054"
+            tooltip: "Next month"
+            onClicked: root.nextMonth()
+        }
+    }
+
+    Grid {
+        columns: 7
+        columnSpacing: root.cellGap
+        rowSpacing: 0
+
+        Repeater {
+            model: root.weekdayNames
+
+            delegate: Text {
+                required property var modelData
+                required property int index
+
+                width: root.cellWidth
+                height: 18
+                text: modelData
+                color: index === 5 ? Theme.warning
+                    : index === 6 ? Theme.error
+                    : Theme.mutedForeground
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeSmall
+                font.weight: Theme.fontWeightBold
+                horizontalAlignment: Text.AlignHCenter
+            }
+        }
+    }
+
+    Grid {
+        columns: 7
+        columnSpacing: root.cellGap
+        rowSpacing: root.cellGap
+
+        Repeater {
+            model: 42
+
+            delegate: Item {
+                id: cell
+                required property int index
+
+                readonly property date dateValue: root.cellDate(index)
+                readonly property bool inMonth: dateValue.getMonth() === root.viewMonth
+                    && dateValue.getFullYear() === root.viewYear
+                readonly property bool isToday: root.sameDay(dateValue, root.today)
+                readonly property bool isSelected: root.sameDay(dateValue, root.selectedDate)
+
+                width: root.cellWidth
+                height: root.cellHeight
+
+                Rectangle {
+                    anchors.fill: parent
+                    anchors.margins: 1
+                    radius: Theme.radiusSmall
+                    color: cell.isSelected ? Theme.primary
+                        : cell.isToday ? Theme.accentSurface
+                        : cellMouse.containsMouse ? Theme.surface
+                        : "transparent"
+                    border.width: cell.isToday && !cell.isSelected ? Theme.borderWidth : 0
+                    border.color: Theme.accentBorder
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: cell.dateValue.getDate()
+                        color: cell.isSelected ? Theme.onPrimary
+                            : cell.isToday ? Theme.primary
+                            : cell.inMonth ? Theme.foreground : Theme.disabled
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeBase
+                        font.weight: cell.isToday || cell.isSelected
+                            ? Theme.fontWeightBold : Theme.fontWeightNormal
+                    }
+
+                    Rectangle {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 4
+                        visible: cell.isToday
+                        width: Theme.spacing.xs + 1
+                        height: width
+                        radius: width / 2
+                        color: cell.isSelected ? Theme.onPrimary : Theme.primary
+                    }
+                }
+
+                MouseArea {
+                    id: cellMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        if (!cell.inMonth) {
+                            root.viewYear = cell.dateValue.getFullYear();
+                            root.viewMonth = cell.dateValue.getMonth();
+                        }
+                        root.selectedDate = cell.dateValue;
+                    }
                 }
             }
         }
     }
+
 }

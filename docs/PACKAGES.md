@@ -22,6 +22,7 @@ Everything below was already present on the system.
 | Fonts: `JetBrainsMono Nerd Font` | All icon glyphs and text use the Nerd Font family | Bar, popups, control center | Yes for the bundled themes |
 | A session locker handling `loginctl lock-session` | The power menu's Lock action emits the standard lock request | Lock screen | No |
 | `docs/THEMING.md` external hook command | Optional script for Hyprland borders, GTK/Qt themes, icons or wallpaper | External theme sync | No |
+| `curl` | Fetches current weather for the calendar flyout from wttr.in | Calendar weather | No (weather card is hidden if unavailable) |
 
 ## Session integration notes
 

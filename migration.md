@@ -443,6 +443,12 @@ Use a native QML calendar implementation where possible. Avoid introducing an ex
 
 Initial scope is a functional calendar UI; external calendar synchronization is not required.
 
+The implemented calendar flyout is a wider glass panel with a live clock and
+seconds, long date, week number, adjacent-month days, today and selected-date
+states, and current weather from wttr.in. The weather location can be set in
+`Settings.weatherLocation`; an empty value uses IP-based detection. Notifications and event lists are not embedded;
+notification state remains in the separate notification system.
+
 ### 1.3 Center section: Workspace indicator
 
 Display the available numbered workspaces.
@@ -579,15 +585,21 @@ The status bar is organized as independent modules:
 - Control center group: the system tray, the configurable system controls and
   the control center button.
 
-The control center group is placed as a unit on the left or right side of the
-bar. Individual controls can be shown or hidden and reordered. Icons can be
-reordered by dragging them directly on the status bar, or from the control
-center's **Status bar** settings view. The layout is persisted and older
-per-button settings are migrated automatically.
+The bar UI is pluggable. `barStyle` selects between two layouts:
+
+- `classic`: one rounded bar with date/time, workspaces and the control center
+  group. The group can be placed on the left or right.
+- `pills`: floating pills for the logo, workspace pager, pinned apps, centered
+  clock, status controls, and separate control center/power buttons.
+
+Both layouts share the same services, icon order, visibility settings and drag
+reordering. In the pills layout the configurable controls live in the status
+pill and Power is a separate round button. The selected style is persisted in
+`bar.json` and older per-button settings are migrated automatically.
 
 Date/time and workspace modules are intentionally fixed for now. They are
-independent modules and may become movable in a later iteration; the control
-center group already supports per-group positioning.
+independent modules and may become movable in a later iteration; the classic
+layout already supports per-group positioning of the control center group.
 
 ## Milestone 2: Shared shell infrastructure
 

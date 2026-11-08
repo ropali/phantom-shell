@@ -16,6 +16,8 @@ PopupWindow {
     property int spacing: Theme.spacing.md
     default property alias contentData: contentColumn.data
 
+    property bool alignRight: false
+
     visible: shown
     color: "transparent"
     implicitWidth: popupWidth
@@ -23,8 +25,10 @@ PopupWindow {
     grabFocus: false
 
     anchor.item: root.anchorItem
-    anchor.edges: root.above ? Edges.Top : Edges.Bottom
-    anchor.gravity: root.above ? Edges.Top : Edges.Bottom
+    anchor.edges: (root.above ? Edges.Top : Edges.Bottom)
+        | (root.alignRight ? Edges.Right : 0)
+    anchor.gravity: (root.above ? Edges.Top : Edges.Bottom)
+        | (root.alignRight ? Edges.Left : 0)
     anchor.adjustment: PopupAdjustment.SlideX
     anchor.margins.top: root.above ? 0 : 6
     anchor.margins.bottom: root.above ? 6 : 0

@@ -8,7 +8,20 @@ Row {
     id: root
 
     property var controller: null
+    property var excludedIds: []
     spacing: Theme.spacing.md
+
+    function visibleItems() {
+        const all = Config.Settings.barVisibleItems();
+        if (!excludedIds || excludedIds.length === 0)
+            return all;
+        const result = [];
+        for (let i = 0; i < all.length; i++) {
+            if (excludedIds.indexOf(all[i].id) === -1)
+                result.push(all[i]);
+        }
+        return result;
+    }
 
     function iconFor(id) {
         if (id === "notifications") return "\uf0f3";
@@ -20,7 +33,7 @@ Row {
     }
 
     Repeater {
-        model: Config.Settings.barVisibleItems()
+        model: root.visibleItems()
 
         delegate: Item {
             id: buttonSlot

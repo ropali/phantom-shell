@@ -61,6 +61,7 @@ phantom-shell/
 │   ├── NightLight.qml
 │   ├── Wallpapers.qml
 │   ├── Media.qml
+│   ├── Weather.qml
 │   ├── Session.qml
 │   ├── SystemTray.qml
 │   └── UiState.qml
@@ -116,7 +117,8 @@ and call service methods; they do not run `hyprctl`, `nmcli`, `wpctl`,
 - Layer-shell surface, `phantom-bar` namespace, input region limited to the
   bar so the transparent strip does not eat clicks.
 - One bar instance per monitor.
-- Left: date and time, with a native QML calendar popup.
+- Left: date and time, with a native QML calendar flyout (live clock,
+  week number, month grid and current weather).
 - Center: Hyprland workspaces, driven by Quickshell's event-driven Hyprland
   integration. Click switches workspace; new workspaces appear automatically.
 - Right: system tray with themed DBusMenu context menus, notification
@@ -124,6 +126,16 @@ and call service methods; they do not run `hyprctl`, `nmcli`, `wpctl`,
   Ethernet), Bluetooth, audio (output/input selection), and a power menu using
   real session APIs. Each control has its own popup; clicking another bar icon
   switches directly without a second click.
+
+Two bar styles are available and can be switched live from the control
+center's **Status bar** settings:
+
+- `classic` — the single rounded bar described above.
+- `pills` — floating glass pills for the logo, workspace pager, pinned apps,
+  centered clock, status controls, and separate control center/power buttons.
+
+The selection is persisted in Quickshell state. The classic layout is the
+default; the pill layout uses the same services, control center and settings.
 
 ## Control center
 

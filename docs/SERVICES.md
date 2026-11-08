@@ -23,6 +23,7 @@ commands or `Quickshell.*` integrations in the panel.
 | `NightLight.qml` | Software warm overlay | `enabled`, `temperature`, `opacity`, `available`, `toggle()`, `setTemperature()` |
 | `Wallpapers.qml` | Wallpaper discovery, selection and persistence | `directory`, `files`, `currentPath`, `refresh()`, `setWallpaper()`, `name()` |
 | `Media.qml` | MPRIS now-playing state and controls | `player`, `available`, `playing`, `title`, `artist`, `album`, `artUrl`, `progress`, `togglePlaying()`, `next()`, `previous()` |
+| `Weather.qml` | Current weather for the calendar flyout via wttr.in | `available`, `location`, `condition`, `temperature`, `humidity`, `icon`, `refresh()` |
 | `SystemTray.qml` | StatusNotifierItem collection | `items`, `values`, `count` |
 | `Session.qml` | Lock, logout, suspend, reboot and shutdown | `actions`, `run(action)`, `lock()`, `logout()`, `suspend()`, `reboot()`, `shutdown()` |
 | `UiState.qml` | Popup coordination, detail keyboard state and outside-click dismissal | `openCount`, `anyOpen`, `detailOpen`, `popupOpened()`, `popupClosed()`, `dismissAll()`, `closeDetail()` |

@@ -10,8 +10,6 @@ Row {
     spacing: Theme.spacing.md
     anchors.verticalCenter: parent ? parent.verticalCenter : undefined
 
-    Component.onCompleted: if (controller) Qt.callLater(controller.updateControlCenterAnchor)
-    onWidthChanged: if (controller) Qt.callLater(controller.updateControlCenterAnchor)
 
     SystemTray {
         anchors.verticalCenter: parent.verticalCenter

@@ -60,23 +60,78 @@ property int screenMargin: 4     // gap from the bar to the screen edge
 property string barPosition: "top"  // "top" or "bottom"
 ```
 
+## Bar styles
+
+Two status bar layouts are available and can be switched live from the control
+center's **Status bar** view:
+
+- `classic` — the original single rounded bar with left, center and right
+  sections.
+- `pills` — floating glass pills: logo, workspace pager, pinned apps, centered
+  clock, status pill, and separate control center and power buttons.
+
+The setting is stored in `bar.json`:
+
+```json
+{ "style": "classic" }
+```
+
+`barWidthPercent`, `edgeGap` and the **Control center position** selector apply
+to the classic style. The pill style spans the screen with fixed outer margins.
+
+### Pinned apps (pill style)
+
+The pills layout shows a configurable app launcher pill. Edit
+`config/Settings.qml`:
+
+```qml
+property var pinnedApps: [
+    { icon: "\uf120", label: "Terminal", command: "ghostty", color: "info" },
+    { icon: "\uf269", label: "Browser", command: "google-chrome-stable", color: "warning" },
+    { icon: "\uf07b", label: "Files", command: "dolphin", color: "secondary" },
+    { icon: "\uf1bc", label: "Spotify", command: "spotify", color: "success" },
+    { icon: "\uf392", label: "Discord", command: "discord", color: "tertiary" }
+]
+```
+
+`icon` is a Nerd Font glyph, `command` is run through `sh -c`, and `color`
+selects a theme role (`info`, `warning`, `success`, `secondary`, `tertiary`).
+
+## Calendar weather
+
+The calendar flyout shows current weather from [wttr.in](https://wttr.in). By
+default the location is detected from the public IP. Override it in
+`config/Settings.qml`:
+
+```qml
+property string weatherLocation: "Budapest"
+```
+
+Leave it empty for automatic detection. Weather is fetched every 30 minutes and
+when the calendar opens; if the request fails, the weather card is hidden. This
+uses `curl` and network access.
+
 ## Status bar buttons
 
-The Network, Bluetooth, Volume, Notifications and Power controls, the system
-tray and the control center button form a single **control center group**. Open
-the control center, click the gear icon in its header, and use the **Status
-bar** view to:
+In the classic style, the Network, Bluetooth, Volume, Notifications and Power
+controls, the system tray and the control center button form a single **control
+center group**. In the pills style the configurable controls live in the status
+pill, Power becomes a separate round button, and the control center button stays
+pinned beside it. Open the control center, click the gear icon in its header,
+and use the **Status bar** view to:
 
 - Show or hide individual controls with the switches.
 - Reorder them with the grip handles, or drag the icons directly on the status
   bar.
 - Move the whole group to the left or right side of the bar with the
-  **Control center position** selector.
+  **Control center position** selector (classic style only).
+- Switch between **Classic** and **Pills** with the **Bar style** selector.
 
 The layout is saved to `Quickshell.statePath("bar.json")` as:
 
 ```json
 {
+  "style": "classic",
   "position": "right",
   "items": [
     { "id": "notifications", "visible": true },

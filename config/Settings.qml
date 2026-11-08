@@ -42,6 +42,10 @@ Singleton {
     // cannot break the Quickshell theme switch if it fails.
     property string externalThemeHook: ""
 
+    // Optional weather location for the calendar flyout. Empty uses the
+    // IP-based location through wttr.in.
+    property string weatherLocation: ""
+
     // Status bar control layout. The system tray, the configurable controls
     // and the control center button form a single group. The group can be
     // placed on the left or right side of the bar.
@@ -55,6 +59,16 @@ Singleton {
 
     property var barLayout: defaultBarLayout
     property string barControlCenterPosition: "right"
+    property string barStyle: "classic"
+
+    // Apps shown in the pinned-apps pill of the pill layout.
+    property var pinnedApps: [
+        { icon: "\uf120", label: "Terminal", command: "ghostty", color: "info" },
+        { icon: "\uf268", label: "Chrome", command: "google-chrome-stable --ozone-platform-hint=auto --enable-features=WaylandWindowDecorations", color: "warning" },
+        { icon: "\uf07b", label: "Files", command: "dolphin", color: "secondary" },
+        { icon: "\uf1bc", label: "Spotify", command: "spotify", color: "success" },
+        { icon: "\uf392", label: "Discord", command: "discord", color: "tertiary" }
+    ]
 
     readonly property string barStatePath: Quickshell.statePath("bar.json")
 
@@ -111,6 +125,7 @@ Singleton {
             if (data && Array.isArray(data.items)) {
                 barLayout = sanitizeBarLayout(data.items);
                 barControlCenterPosition = data.position === "left" ? "left" : "right";
+                barStyle = data.style === "pills" ? "pills" : "classic";
                 return;
             }
 
@@ -135,6 +150,7 @@ Singleton {
     function saveBarState() {
         try {
             barStateFile.setText(JSON.stringify({
+                style: barStyle,
                 position: barControlCenterPosition,
                 items: barLayout
             }));
@@ -179,6 +195,19 @@ Singleton {
     function setBarControlCenterPosition(position) {
         barControlCenterPosition = position === "left" ? "left" : "right";
         saveBarState();
+    }
+
+    function setBarStyle(style) {
+        barStyle = style === "pills" ? "pills" : "classic";
+        saveBarState();
+    }
+
+    function isBarItemVisible(id) {
+        for (let i = 0; i < barLayout.length; i++) {
+            if (barLayout[i].id === id)
+                return barLayout[i].visible;
+        }
+        return true;
     }
 
     function moveBarItem(from, to) {

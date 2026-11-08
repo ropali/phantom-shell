@@ -43,7 +43,7 @@ Column {
 
     Text {
         width: parent.width
-        text: "Choose which controls appear in the control center group. Drag the grip here or the icons on the bar to reorder them."
+        text: "Choose which controls appear in the status bar. Drag the grip here or the icons on the bar to reorder them."
         color: Theme.mutedForeground
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSizeSmall
@@ -54,6 +54,100 @@ Column {
     RowLayout {
         width: parent.width
         spacing: Theme.spacing.md
+
+        Column {
+            Layout.fillWidth: true
+            spacing: 1
+
+            Text {
+                width: parent.width
+                text: "Bar style"
+                color: Theme.foreground
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeBase
+                font.weight: Theme.fontWeightBold
+            }
+
+            Text {
+                width: parent.width
+                text: "Classic single bar or floating pill layout"
+                color: Theme.mutedForeground
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeSmall
+                elide: Text.ElideRight
+            }
+        }
+
+        Rectangle {
+            id: styleControl
+            Layout.preferredWidth: 124
+            Layout.preferredHeight: 28
+            Layout.alignment: Qt.AlignVCenter
+            radius: Theme.radiusSmall
+            color: Theme.surface
+            border.width: Theme.borderWidth
+            border.color: Theme.subtleBorder
+
+            Row {
+                anchors.fill: parent
+                anchors.margins: 2
+                spacing: 2
+
+                Rectangle {
+                    width: (styleControl.width - 6) / 2
+                    height: parent.height
+                    radius: Theme.radiusSmall
+                    color: Config.Settings.barStyle === "classic"
+                        ? Theme.primary : "transparent"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Classic"
+                        color: Config.Settings.barStyle === "classic"
+                            ? Theme.onPrimary : Theme.mutedForeground
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeSmall
+                        font.weight: Theme.fontWeightBold
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Config.Settings.setBarStyle("classic")
+                    }
+                }
+
+                Rectangle {
+                    width: (styleControl.width - 6) / 2
+                    height: parent.height
+                    radius: Theme.radiusSmall
+                    color: Config.Settings.barStyle === "pills"
+                        ? Theme.primary : "transparent"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Pills"
+                        color: Config.Settings.barStyle === "pills"
+                            ? Theme.onPrimary : Theme.mutedForeground
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSizeSmall
+                        font.weight: Theme.fontWeightBold
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Config.Settings.setBarStyle("pills")
+                    }
+                }
+            }
+        }
+    }
+
+    RowLayout {
+        width: parent.width
+        spacing: Theme.spacing.md
+        visible: Config.Settings.barStyle === "classic"
 
         Column {
             Layout.fillWidth: true
@@ -324,7 +418,7 @@ Column {
 
     Text {
         width: parent.width
-        text: "You can drag the icons directly on the status bar to reorder them. The system tray and control center button stay pinned at the ends of the group."
+        text: "You can drag the icons directly on the status bar to reorder them. In the Pills style the controls live in the status pill and Power becomes a separate round button. The control center and system tray stay pinned."
         color: Theme.mutedForeground
         font.family: Theme.fontFamily
         font.pixelSize: Theme.fontSizeSmall
