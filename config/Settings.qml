@@ -23,7 +23,7 @@ Singleton {
     // Visible gap between the bar and tiled windows. Hyprland's gaps_out is
     // compensated automatically, so changing gaps_out does not change this
     // value. Set to 0 for windows to touch the bar.
-    property int barWindowGap: 4
+    property int barWindowGap: 10
 
     // Workspaces
     property int workspaceMinCount: 0

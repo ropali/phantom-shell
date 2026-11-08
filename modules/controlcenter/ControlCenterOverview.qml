@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell.Services.UPower
 import "../../themes"
 import "../../services" as Services
@@ -17,76 +18,147 @@ Item {
         : Services.Battery.percentage <= 30 ? Theme.warning
         : Theme.success
 
-    implicitHeight: content.implicitHeight + Theme.spacing.lg * 2
+    implicitHeight: content.implicitHeight + Theme.spacing.xl * 2
+
+    // Background gradient overlay for depth
+    Rectangle {
+        anchors.fill: parent
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.02) }
+            GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0) }
+        }
+    }
 
     Column {
         id: content
         anchors.fill: parent
-        anchors.margins: Theme.spacing.lg
+        anchors.margins: Theme.spacing.xl
         spacing: Theme.spacing.lg
 
-        RowLayout {
+        // Header with gradient accent
+        Rectangle {
             width: parent.width
-            height: 28
-            spacing: Theme.spacing.md
-
-            Text {
-                Layout.alignment: Qt.AlignVCenter
-                text: "\uf1de"
-                color: Theme.primary
-                font.family: Theme.iconFontFamily
-                font.pixelSize: Theme.fontSizeMedium
+            height: 36
+            radius: Theme.radiusSmall
+            color: "transparent"
+            
+            Rectangle {
+                anchors.fill: parent
+                radius: parent.radius
+                opacity: 0.05
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0.0; color: Theme.primary }
+                    GradientStop { position: 1.0; color: Theme.secondary }
+                }
             }
 
-            Text {
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter
-                text: "Quick settings"
-                color: Theme.foreground
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
-                font.weight: Theme.fontWeightBold
-            }
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: Theme.spacing.md
+                anchors.rightMargin: Theme.spacing.md
+                spacing: Theme.spacing.md
 
-            Item {
-                width: 26
-                height: 26
+                Rectangle {
+                    Layout.preferredWidth: 28
+                    Layout.preferredHeight: 28
+                    radius: Theme.radiusSmall
+                    color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.15)
+                    
+                    Text {
+                        anchors.centerIn: parent
+                        text: "\uf1de"
+                        color: Theme.primary
+                        font.family: Theme.iconFontFamily
+                        font.pixelSize: Theme.fontSizeMedium
+                    }
+                }
 
                 Text {
-                    anchors.centerIn: parent
-                    text: "\uf013"
-                    color: settingsMouse.containsMouse ? Theme.foreground : Theme.mutedForeground
-                    font.family: Theme.iconFontFamily
-                    font.pixelSize: Theme.fontSizeMedium
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    text: "Quick Settings"
+                    color: Theme.foreground
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSize
+                    font.weight: Theme.fontWeightBold
+                    font.letterSpacing: 0.5
                 }
 
-                MouseArea {
-                    id: settingsMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.openDetail("bar")
+                Rectangle {
+                    width: 30
+                    height: 30
+                    radius: Theme.radiusSmall
+                    color: settingsMouse.containsMouse 
+                        ? Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.6)
+                        : "transparent"
+                    
+                    Behavior on color {
+                        ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                    }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "\uf013"
+                        color: settingsMouse.containsMouse ? Theme.foreground : Theme.mutedForeground
+                        font.family: Theme.iconFontFamily
+                        font.pixelSize: Theme.fontSizeMedium
+                        
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.animationFast }
+                        }
+                        
+                        rotation: settingsMouse.containsMouse ? 90 : 0
+                        Behavior on rotation {
+                            NumberAnimation { duration: Theme.animationNormal; easing.type: Easing.OutBack }
+                        }
+                    }
+
+                    MouseArea {
+                        id: settingsMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.openDetail("bar")
+                    }
                 }
-            }
 
-            Item {
-                width: 26
-                height: 26
+                Rectangle {
+                    width: 30
+                    height: 30
+                    radius: Theme.radiusSmall
+                    color: closeMouse.containsMouse 
+                        ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.15)
+                        : "transparent"
+                    
+                    Behavior on color {
+                        ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
+                    }
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "\uf00d"
-                    color: closeMouse.containsMouse ? Theme.foreground : Theme.mutedForeground
-                    font.family: Theme.iconFontFamily
-                    font.pixelSize: Theme.fontSizeMedium
-                }
+                    Text {
+                        anchors.centerIn: parent
+                        text: "\uf00d"
+                        color: closeMouse.containsMouse ? Theme.error : Theme.mutedForeground
+                        font.family: Theme.iconFontFamily
+                        font.pixelSize: Theme.fontSizeMedium
+                        
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.animationFast }
+                        }
+                        
+                        scale: closeMouse.pressed ? 0.85 : 1.0
+                        Behavior on scale {
+                            NumberAnimation { duration: 100 }
+                        }
+                    }
 
-                MouseArea {
-                    id: closeMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.closeRequested()
+                    MouseArea {
+                        id: closeMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.closeRequested()
+                    }
                 }
             }
         }
@@ -175,18 +247,31 @@ Item {
             }
         }
 
+        // Enhanced audio/brightness panel with glass effect
         Rectangle {
             width: parent.width
-            height: 76
-            radius: Theme.radiusSmall
+            height: 90
+            radius: Theme.radius
             color: Theme.panelSurface
             border.width: Theme.borderWidth
-            border.color: Theme.subtleBorder
+            border.color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.2)
+            
+
+            // Subtle gradient overlay
+            Rectangle {
+                anchors.fill: parent
+                radius: parent.radius
+                opacity: 0.03
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: Theme.primary }
+                    GradientStop { position: 1.0; color: "transparent" }
+                }
+            }
 
             Column {
                 anchors.fill: parent
                 anchors.margins: Theme.spacing.lg
-                spacing: Theme.spacing.md
+                spacing: Theme.spacing.lg
 
                 Components.OverviewSliderRow {
                     width: parent.width
@@ -226,40 +311,64 @@ Item {
             width: parent.width
         }
 
+        // Theme and Wallpaper cards with improved visuals
         RowLayout {
             width: parent.width
-            height: 84
+            height: 94
             spacing: Theme.spacing.md
 
             Rectangle {
                 id: themeCard
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                radius: Theme.radiusSmall
+                radius: Theme.radius
                 color: themeMouse.containsMouse ? Theme.panelSurfaceHover : Theme.panelSurface
                 border.width: Theme.borderWidth
-                border.color: Theme.subtleBorder
+                border.color: themeMouse.containsMouse 
+                    ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.4)
+                    : Theme.subtleBorder
 
                 Behavior on color {
                     ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
                 }
+                
+                Behavior on border.color {
+                    ColorAnimation { duration: Theme.animationFast }
+                }
+                
+                // Hover glow effect
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    opacity: themeMouse.containsMouse ? 0.08 : 0
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: Theme.primary }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
+                    
+                    Behavior on opacity {
+                        NumberAnimation { duration: Theme.animationNormal }
+                    }
+                }
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: Theme.spacing.md + Theme.spacing.xs
+                    anchors.margins: Theme.spacing.lg
                     spacing: Theme.spacing.md
 
                     Rectangle {
-                        Layout.preferredWidth: 44
-                        Layout.preferredHeight: 44
+                        Layout.preferredWidth: 52
+                        Layout.preferredHeight: 52
                         Layout.alignment: Qt.AlignVCenter
-                        radius: Theme.radiusSmall
+                        radius: Theme.radius
                         color: Theme.surfaceElevated
+                        border.width: Theme.borderWidth
+                        border.color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.3)
 
                         Grid {
                             anchors.centerIn: parent
                             columns: 2
-                            spacing: 2
+                            spacing: 3
 
                             Repeater {
                                 model: [
@@ -271,12 +380,17 @@ Item {
 
                                 delegate: Rectangle {
                                     required property var modelData
-                                    width: 18
-                                    height: 18
-                                    radius: 3
+                                    width: 20
+                                    height: 20
+                                    radius: 4
                                     color: modelData
-                                    border.width: Theme.borderWidth
-                                    border.color: Theme.subtleBorder
+                                    border.width: 1
+                                    border.color: Qt.rgba(0, 0, 0, 0.15)
+                                    
+                                    scale: themeMouse.containsMouse ? 1.05 : 1.0
+                                    Behavior on scale {
+                                        NumberAnimation { duration: Theme.animationFast }
+                                    }
                                 }
                             }
                         }
@@ -285,7 +399,7 @@ Item {
                     Column {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignVCenter
-                        spacing: 1
+                        spacing: 2
 
                         Text {
                             width: parent.width
@@ -293,6 +407,7 @@ Item {
                             color: Theme.mutedForeground
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSizeSmall
+                            font.weight: Theme.fontWeightMedium
                         }
 
                         Text {
@@ -306,12 +421,23 @@ Item {
                         }
                     }
 
-                    Text {
+                    Item {
                         Layout.alignment: Qt.AlignVCenter
-                        text: "\uf054"
-                        color: Theme.mutedForeground
-                        font.family: Theme.iconFontFamily
-                        font.pixelSize: Theme.fontSizeSmall
+                        Layout.preferredWidth: 16
+                        Layout.preferredHeight: 16
+                        
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: themeMouse.containsMouse ? parent.width - width + 2 : parent.width - width
+                            text: "\uf054"
+                            color: Theme.mutedForeground
+                            font.family: Theme.iconFontFamily
+                            font.pixelSize: Theme.fontSizeSmall
+                            
+                            Behavior on x {
+                                NumberAnimation { duration: Theme.animationFast }
+                            }
+                        }
                     }
                 }
 
@@ -328,39 +454,67 @@ Item {
                 id: wallpaperCard
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                radius: Theme.radiusSmall
+                radius: Theme.radius
                 color: wallpaperMouse.containsMouse ? Theme.panelSurfaceHover : Theme.panelSurface
                 border.width: Theme.borderWidth
-                border.color: Theme.subtleBorder
+                border.color: wallpaperMouse.containsMouse 
+                    ? Qt.rgba(Theme.secondary.r, Theme.secondary.g, Theme.secondary.b, 0.4)
+                    : Theme.subtleBorder
                 clip: true
 
                 Behavior on color {
                     ColorAnimation { duration: Theme.animationFast; easing.type: Theme.easingType }
                 }
+                
+                Behavior on border.color {
+                    ColorAnimation { duration: Theme.animationFast }
+                }
+                
+                // Hover glow effect
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    opacity: wallpaperMouse.containsMouse ? 0.08 : 0
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: Theme.secondary }
+                        GradientStop { position: 1.0; color: "transparent" }
+                    }
+                    
+                    Behavior on opacity {
+                        NumberAnimation { duration: Theme.animationNormal }
+                    }
+                }
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: Theme.spacing.md + Theme.spacing.xs
+                    anchors.margins: Theme.spacing.lg
                     spacing: Theme.spacing.md
 
                     Rectangle {
-                        Layout.preferredWidth: 44
-                        Layout.preferredHeight: 44
+                        Layout.preferredWidth: 52
+                        Layout.preferredHeight: 52
                         Layout.alignment: Qt.AlignVCenter
-                        radius: Theme.radiusSmall
+                        radius: Theme.radius
                         color: Theme.surfaceElevated
+                        border.width: Theme.borderWidth
+                        border.color: Qt.rgba(Theme.secondary.r, Theme.secondary.g, Theme.secondary.b, 0.3)
                         clip: true
 
                         Image {
                             anchors.fill: parent
                             source: Services.Wallpapers.currentPath.length > 0
                                 ? "file://" + Services.Wallpapers.currentPath : ""
-                            sourceSize.width: 88
-                            sourceSize.height: 88
+                            sourceSize.width: 104
+                            sourceSize.height: 104
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                             cache: false
                             visible: Services.Wallpapers.currentPath.length > 0
+                            
+                            scale: wallpaperMouse.containsMouse ? 1.1 : 1.0
+                            Behavior on scale {
+                                NumberAnimation { duration: Theme.animationNormal }
+                            }
                         }
 
                         Text {
@@ -369,14 +523,14 @@ Item {
                             text: "\uf03e"
                             color: Theme.mutedForeground
                             font.family: Theme.iconFontFamily
-                            font.pixelSize: Theme.fontSizeMedium
+                            font.pixelSize: Theme.fontSizeLarge
                         }
                     }
 
                     Column {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignVCenter
-                        spacing: 1
+                        spacing: 2
 
                         Text {
                             width: parent.width
@@ -384,6 +538,7 @@ Item {
                             color: Theme.mutedForeground
                             font.family: Theme.fontFamily
                             font.pixelSize: Theme.fontSizeSmall
+                            font.weight: Theme.fontWeightMedium
                         }
 
                         Text {
@@ -397,12 +552,23 @@ Item {
                         }
                     }
 
-                    Text {
+                    Item {
                         Layout.alignment: Qt.AlignVCenter
-                        text: "\uf054"
-                        color: Theme.mutedForeground
-                        font.family: Theme.iconFontFamily
-                        font.pixelSize: Theme.fontSizeSmall
+                        Layout.preferredWidth: 16
+                        Layout.preferredHeight: 16
+                        
+                        Text {
+                            anchors.verticalCenter: parent.verticalCenter
+                            x: wallpaperMouse.containsMouse ? parent.width - width + 2 : parent.width - width
+                            text: "\uf054"
+                            color: Theme.mutedForeground
+                            font.family: Theme.iconFontFamily
+                            font.pixelSize: Theme.fontSizeSmall
+                            
+                            Behavior on x {
+                                NumberAnimation { duration: Theme.animationFast }
+                            }
+                        }
                     }
                 }
 
@@ -416,19 +582,32 @@ Item {
             }
         }
 
+        // System status card with enhanced styling
         Rectangle {
             width: parent.width
-            height: 60
-            radius: Theme.radiusSmall
+            height: 68
+            radius: Theme.radius
             color: Theme.panelSurface
             border.width: Theme.borderWidth
-            border.color: Theme.subtleBorder
+            border.color: Qt.rgba(root.batteryColor.r, root.batteryColor.g, root.batteryColor.b, 0.3)
+            
+            // Battery-based gradient accent
+            Rectangle {
+                anchors.fill: parent
+                radius: parent.radius
+                opacity: 0.04
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0.0; color: root.batteryColor }
+                    GradientStop { position: 1.0; color: "transparent" }
+                }
+            }
 
             RowLayout {
                 anchors.fill: parent
                 anchors.leftMargin: Theme.spacing.lg
-                anchors.rightMargin: Theme.spacing.sm
-                spacing: Theme.spacing.md
+                anchors.rightMargin: Theme.spacing.md
+                spacing: Theme.spacing.lg
 
                 Item {
                     Layout.fillHeight: true
@@ -437,25 +616,32 @@ Item {
                     RowLayout {
                         id: batteryRow
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: Theme.spacing.sm
+                        spacing: Theme.spacing.md
 
-                        Text {
-                            Layout.alignment: Qt.AlignVCenter
-                            text: Services.Battery.charging ? "\uf0e7"
-                                : !Services.Battery.available ? "\uf0e7"
-                                : Services.Battery.percentage >= 90 ? "\uf240"
-                                : Services.Battery.percentage >= 65 ? "\uf241"
-                                : Services.Battery.percentage >= 40 ? "\uf242"
-                                : Services.Battery.percentage >= 15 ? "\uf243"
-                                : "\uf244"
-                            color: root.batteryColor
-                            font.family: Theme.iconFontFamily
-                            font.pixelSize: Theme.fontSizeLarge
+                        Rectangle {
+                            Layout.preferredWidth: 40
+                            Layout.preferredHeight: 40
+                            radius: Theme.radiusSmall
+                            color: Qt.rgba(root.batteryColor.r, root.batteryColor.g, root.batteryColor.b, 0.15)
+                            
+                            Text {
+                                anchors.centerIn: parent
+                                text: Services.Battery.charging ? "\uf0e7"
+                                    : !Services.Battery.available ? "\uf0e7"
+                                    : Services.Battery.percentage >= 90 ? "\uf240"
+                                    : Services.Battery.percentage >= 65 ? "\uf241"
+                                    : Services.Battery.percentage >= 40 ? "\uf242"
+                                    : Services.Battery.percentage >= 15 ? "\uf243"
+                                    : "\uf244"
+                                color: root.batteryColor
+                                font.family: Theme.iconFontFamily
+                                font.pixelSize: Theme.fontSizeLarge
+                            }
                         }
 
                         Column {
                             Layout.alignment: Qt.AlignVCenter
-                            spacing: 0
+                            spacing: 2
 
                             Text {
                                 text: Services.Battery.available
@@ -490,36 +676,113 @@ Item {
 
                 Rectangle {
                     Layout.preferredWidth: 1
-                    Layout.preferredHeight: 28
+                    Layout.preferredHeight: 32
                     color: Theme.subtleBorder
                 }
 
                 RowLayout {
                     spacing: Theme.spacing.sm
 
-                    Components.IconButton {
-                        buttonSize: 30
-                        iconSize: Theme.fontSize
-                        icon: "\uf023"
-                        tooltip: "Lock"
-                        onClicked: Services.Session.lock()
+                    Rectangle {
+                        width: 34
+                        height: 34
+                        radius: Theme.radiusSmall
+                        color: lockMouse.containsMouse 
+                            ? Qt.rgba(Theme.info.r, Theme.info.g, Theme.info.b, 0.15)
+                            : "transparent"
+                        
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.animationFast }
+                        }
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "\uf023"
+                            color: lockMouse.containsMouse ? Theme.info : Theme.mutedForeground
+                            font.family: Theme.iconFontFamily
+                            font.pixelSize: Theme.fontSize
+                            
+                            scale: lockMouse.pressed ? 0.9 : 1.0
+                            Behavior on scale {
+                                NumberAnimation { duration: 100 }
+                            }
+                        }
+                        
+                        MouseArea {
+                            id: lockMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: Services.Session.lock()
+                        }
                     }
 
-                    Components.IconButton {
-                        buttonSize: 30
-                        iconSize: Theme.fontSize
-                        icon: "\uf2f5"
-                        tooltip: "Logout"
-                        onClicked: Services.Session.logout()
+                    Rectangle {
+                        width: 34
+                        height: 34
+                        radius: Theme.radiusSmall
+                        color: logoutMouse.containsMouse 
+                            ? Qt.rgba(Theme.warning.r, Theme.warning.g, Theme.warning.b, 0.15)
+                            : "transparent"
+                        
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.animationFast }
+                        }
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "\uf2f5"
+                            color: logoutMouse.containsMouse ? Theme.warning : Theme.mutedForeground
+                            font.family: Theme.iconFontFamily
+                            font.pixelSize: Theme.fontSize
+                            
+                            scale: logoutMouse.pressed ? 0.9 : 1.0
+                            Behavior on scale {
+                                NumberAnimation { duration: 100 }
+                            }
+                        }
+                        
+                        MouseArea {
+                            id: logoutMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: Services.Session.logout()
+                        }
                     }
 
-                    Components.IconButton {
-                        buttonSize: 30
-                        iconSize: Theme.fontSize
-                        icon: "\uf011"
-                        iconColor: Theme.error
-                        tooltip: "Power menu"
-                        onClicked: root.powerRequested()
+                    Rectangle {
+                        width: 34
+                        height: 34
+                        radius: Theme.radiusSmall
+                        color: powerMouse.containsMouse 
+                            ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.2)
+                            : "transparent"
+                        
+                        Behavior on color {
+                            ColorAnimation { duration: Theme.animationFast }
+                        }
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "\uf011"
+                            color: Theme.error
+                            font.family: Theme.iconFontFamily
+                            font.pixelSize: Theme.fontSize
+                            
+                            scale: powerMouse.pressed ? 0.9 : 1.0
+                            Behavior on scale {
+                                NumberAnimation { duration: 100 }
+                            }
+                        }
+                        
+                        MouseArea {
+                            id: powerMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.powerRequested()
+                        }
                     }
                 }
             }
