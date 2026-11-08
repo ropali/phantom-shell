@@ -26,6 +26,8 @@ Singleton {
     readonly property string artist: player ? (player.trackArtist || "") : ""
     readonly property string album: player ? (player.trackAlbum || "") : ""
     readonly property string artUrl: player ? (player.trackArtUrl || "") : ""
+    readonly property string identity: player ? (player.identity || "") : ""
+    readonly property string desktopEntry: player ? (player.desktopEntry || "") : ""
     readonly property real position: player ? player.position : 0
     readonly property real length: player ? player.length : 0
     readonly property real progress: length > 0 ? Math.max(0, Math.min(1, position / length)) : 0
