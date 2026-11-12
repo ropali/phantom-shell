@@ -3,12 +3,13 @@ import QtQuick.Layouts
 import Quickshell
 import "../../components" as Components
 import "../../themes"
+import "../../config" as Config
 import "../../services" as Services
 
 Components.Popup {
     id: root
 
-    popupWidth: 440
+    popupWidth: Config.Settings.calendarWidth
     padding: Theme.padding
     spacing: Theme.spacing.md
 
@@ -20,9 +21,10 @@ Components.Popup {
     readonly property int contentWidth: popupWidth - padding * 2
     readonly property int cellGap: 2
     readonly property int cellWidth: Math.floor((contentWidth - cellGap * 6) / 7)
-    readonly property int cellHeight: 36
+    readonly property int cellHeight: Config.Settings.calendarCellHeight
 
-    readonly property int firstWeekday: (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7
+    readonly property int firstWeekday: (new Date(viewYear, viewMonth, 1).getDay()
+        - Config.Settings.calendarFirstDay + 7) % 7
     readonly property int daysInMonth: new Date(viewYear, viewMonth + 1, 0).getDate()
     readonly property string monthTitle: Qt.formatDateTime(new Date(viewYear, viewMonth, 1), "MMMM yyyy")
     readonly property int weekNumber: {
@@ -36,8 +38,9 @@ Components.Popup {
 
     readonly property var weekdayNames: {
         const result = [];
+        const start = new Date(2024, 0, 7 + Config.Settings.calendarFirstDay);
         for (let i = 0; i < 7; i++)
-            result.push(Qt.formatDateTime(new Date(2024, 0, 1 + i), "ddd"));
+            result.push(Qt.formatDateTime(new Date(start.getTime() + i * 86400000), "ddd"));
         return result;
     }
 
@@ -180,7 +183,8 @@ Components.Popup {
             Layout.alignment: Qt.AlignVCenter
             Layout.preferredWidth: 170
             Layout.preferredHeight: 48
-            visible: Services.Weather.available || Services.Weather.lastError.length > 0
+            visible: Config.Settings.calendarShowWeather
+                && (Services.Weather.available || Services.Weather.lastError.length > 0)
             radius: Theme.radiusSmall
             color: Theme.surface
             border.width: Theme.borderWidth
@@ -252,6 +256,7 @@ Components.Popup {
 
         Rectangle {
             Layout.alignment: Qt.AlignVCenter
+            visible: Config.Settings.calendarShowWeekNumbers
             width: weekLabel.implicitWidth + Theme.spacing.lg
             height: Theme.spacing.xl + Theme.spacing.xs
             radius: height / 2
@@ -324,11 +329,13 @@ Components.Popup {
                 required property var modelData
                 required property int index
 
+                readonly property int dayOfWeek: (index + Config.Settings.calendarFirstDay) % 7
+
                 width: root.cellWidth
                 height: 18
                 text: modelData
-                color: index === 5 ? Theme.warning
-                    : index === 6 ? Theme.error
+                color: dayOfWeek === 5 ? Theme.warning
+                    : dayOfWeek === 6 ? Theme.error
                     : Theme.mutedForeground
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSizeSmall
@@ -353,7 +360,8 @@ Components.Popup {
                 readonly property date dateValue: root.cellDate(index)
                 readonly property bool inMonth: dateValue.getMonth() === root.viewMonth
                     && dateValue.getFullYear() === root.viewYear
-                readonly property bool isToday: root.sameDay(dateValue, root.today)
+                readonly property bool isToday: Config.Settings.calendarHighlightToday
+                    && root.sameDay(dateValue, root.today)
                 readonly property bool isSelected: root.sameDay(dateValue, root.selectedDate)
 
                 width: root.cellWidth
@@ -365,13 +373,15 @@ Components.Popup {
                     radius: Theme.radiusSmall
                     color: cell.isSelected ? Theme.primary
                         : cell.isToday ? Theme.accentSurface
-                        : cellMouse.containsMouse ? Theme.surface
-                        : "transparent"
+                        : cellMouse.containsMouse
+                            && (cell.inMonth || Config.Settings.calendarShowAdjacentMonths)
+                            ? Theme.surface : "transparent"
                     border.width: cell.isToday && !cell.isSelected ? Theme.borderWidth : 0
                     border.color: Theme.accentBorder
 
                     Text {
                         anchors.centerIn: parent
+                        visible: cell.inMonth || Config.Settings.calendarShowAdjacentMonths
                         text: cell.dateValue.getDate()
                         color: cell.isSelected ? Theme.onPrimary
                             : cell.isToday ? Theme.primary
@@ -398,6 +408,7 @@ Components.Popup {
                     id: cellMouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    enabled: cell.inMonth || Config.Settings.calendarShowAdjacentMonths
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
                         if (!cell.inMonth) {

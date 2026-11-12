@@ -8,7 +8,7 @@ import "../../components" as Components
 Components.Popup {
     id: root
 
-    popupWidth: 440
+    popupWidth: Config.Settings.controlCenterWidth
     padding: Theme.padding
     spacing: 0
     alignRight: Config.Settings.barStyle === "pills"

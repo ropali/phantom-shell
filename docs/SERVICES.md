@@ -21,12 +21,12 @@ commands or `Quickshell.*` integrations in the panel.
 | `Battery.qml` | UPower display battery and AC state | `available`, `onBattery`, `percentage`, `state`, `stateLabel`, `charging`, `timeLabel` |
 | `PowerProfiles.qml` | Power saver/balanced/performance profiles | `profile`, `hasPerformanceProfile`, `options`, `setProfile()` |
 | `NightLight.qml` | Software warm overlay | `enabled`, `temperature`, `opacity`, `available`, `toggle()`, `setTemperature()` |
-| `Wallpapers.qml` | Wallpaper discovery, selection and persistence | `directory`, `files`, `currentPath`, `refresh()`, `setWallpaper()`, `name()` |
+| `Wallpapers.qml` | Wallpaper discovery, selection and persistence | `directory` (from settings), `files`, `currentPath`, `refresh()`, `setWallpaper()`, `name()` |
 | `Media.qml` | MPRIS now-playing state and controls | `player`, `available`, `playing`, `title`, `artist`, `album`, `artUrl`, `progress`, `togglePlaying()`, `next()`, `previous()` |
 | `Weather.qml` | Current weather for the calendar flyout via wttr.in | `available`, `location`, `condition`, `temperature`, `humidity`, `icon`, `refresh()` |
 | `SystemTray.qml` | StatusNotifierItem collection | `items`, `values`, `count` |
 | `Session.qml` | Lock, logout, suspend, reboot and shutdown | `actions`, `run(action)`, `lock()`, `logout()`, `suspend()`, `reboot()`, `shutdown()` |
-| `UiState.qml` | Popup coordination, detail keyboard state and outside-click dismissal | `openCount`, `anyOpen`, `detailOpen`, `popupOpened()`, `popupClosed()`, `dismissAll()`, `closeDetail()` |
+| `UiState.qml` | Popup coordination, detail keyboard state, settings-window state and outside-click dismissal | `openCount`, `anyOpen`, `detailOpen`, `settingsOpen`, `popupOpened()`, `popupClosed()`, `dismissAll()`, `closeDetail()`, `openSettings()`, `closeSettings()`, `toggleSettings()` |
 
 ## Reusable detail panels
 
@@ -74,3 +74,11 @@ gamma daemon. Wallpaper selection is persisted in
 3. Expose reactive properties and small intention-revealing methods.
 4. Add the service and its API to this document.
 5. Add a verification step to `docs/TESTING.md`.
+
+
+## Settings application
+
+The global settings application is not a system service. It consumes the same
+singletons as the rest of the shell and is coordinated through
+`UiState.settingsOpen`, so every entry point opens the same window. See
+[`SETTINGS.md`](SETTINGS.md).

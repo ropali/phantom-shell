@@ -7,7 +7,7 @@ import "../config" as Config
 Singleton {
     id: service
 
-    readonly property string directory: Quickshell.env("HOME") + "/Pictures/wallpapers"
+    readonly property string directory: Config.Settings.wallpaperDirectory
     readonly property string statePath: Quickshell.statePath("wallpaper.json")
 
     property var files: []
@@ -16,9 +16,10 @@ Singleton {
     Process {
         id: listProcess
         command: ["sh", "-c",
-            "find \"$HOME/Pictures/wallpapers\" -type f "
+            "find \"$WALLPAPER_DIR\" -type f "
             + "\\( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' "
             + "-o -iname '*.webp' \\) | sort"]
+        environment: ({ WALLPAPER_DIR: service.directory })
         running: false
 
         stdout: StdioCollector {
@@ -37,6 +38,13 @@ Singleton {
     Component.onCompleted: {
         loadState();
         refresh();
+    }
+
+    Connections {
+        target: Config.Settings
+        function onWallpaperDirectoryChanged() {
+            service.refresh();
+        }
     }
 
     function loadState() {

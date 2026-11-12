@@ -134,7 +134,7 @@ Quickshell.statePath("theme.json")
 | Tray service | The tray UI reads `Services.SystemTray.items` rather than importing the Quickshell tray module | Code inspected |
 | Workspace service | Workspace IDs and lookup live in `Hyprland.workspaceIds()` and `workspaceById()` | Code inspected |
 | Session service | Power menu labels, icons and destructive styling come from `Session.actions`; execution goes through `Session.run()` | Popup rendered |
-| Notification state | `Notifications` exposes DND, history, count and clear/dismiss methods | Service loaded; no daemon until Milestone 4 |
+| Notification state | `Notifications` exposes DND, history, count and clear/dismiss methods | Service loaded; no daemon until the notification milestone |
 | Load after refactor | No QML errors or missing imports after restart | Runtime tested |
 
 Verification command:
@@ -166,7 +166,7 @@ Results:
 | Wallpaper layer | `phantom-wallpaper`, `0 0 2560 1440` |
 | Tray watcher | `org.kde.StatusNotifierWatcher` and `StatusNotifierHost` owned by `qs` |
 | Tray icons | Populate through the Phantom-owned StatusNotifier watcher |
-| Notification daemon | No owner for `org.freedesktop.Notifications` (expected until Milestone 4) |
+| Notification daemon | No owner for `org.freedesktop.Notifications` (expected until the notification milestone) |
 | Duplicate instances | None |
 
 Startup at login was not tested without a reboot. The configured command is the
@@ -178,7 +178,7 @@ exact command verified manually, and both edited Lua files pass `luac -p`.
   installed. It runs, but the package should be rebuilt.
 - The session runs only Phantom, which owns the StatusNotifier watcher and
   populates tray icons.
-- There is no notification daemon until Milestone 4. Applications cannot show
+- There is no notification daemon until the notification milestone. Applications cannot show
   desktop notifications in the meantime.
 - The Noctalia shell has been removed. Its launcher, control center, settings
   panel, OSD and annotation/lock IPC are gone; `SUPER + SPACE` now starts
@@ -237,3 +237,29 @@ views own their single scroll area.
 7. Open the power menu; verify each action on a safe session.
 8. Open the control center; switch themes, choose a wallpaper, and restart
    Quickshell to confirm persistence.
+
+## Global settings checklist
+
+1. Run `qs ipc -p $HOME/Workspace/phantom-shell call phantom settings`; the
+   window opens centered on the focused monitor.
+2. Press `Escape`; the window closes. Open it again and click the dim area
+   outside the card; it also closes.
+3. Switch through every sidebar category with no QML errors.
+4. Change **Panel → Bar height**, width, alignment and visibility; confirm the
+   bar updates and the values survive a restart.
+5. Toggle a bar module and reorder it from settings; confirm the bar order
+   matches and that dragging on the bar still writes the same `bar.json`.
+6. Change date/time format, seconds, AM/PM and date order; confirm the bar clock
+   and live preview update.
+7. Change calendar first day, week numbers, adjacent dates, highlight and size;
+   open the calendar and confirm the grid follows.
+8. Change control center columns, width, card order/visibility and sections;
+   open the control center and confirm the overview follows.
+9. Change theme, text scale, radius and opacity; confirm the whole shell and
+   the settings window update immediately.
+10. Change wallpaper directory, scaling and fade duration; select a wallpaper
+    and confirm it persists after restart.
+11. Use **Advanced** category resets and the confirmed reset-all; confirm the
+    bar and settings window recover.
+12. Press `SUPER + ,`; the same settings window opens (do not create a second
+    instance).

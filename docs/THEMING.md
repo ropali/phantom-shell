@@ -145,3 +145,22 @@ Use it to update Hyprland borders, GTK/Qt themes, icon themes or wallpaper
 accent colors. It runs outside the Quickshell theme switch: a failing or missing
 hook cannot interrupt or revert the palette change. `ThemeManager.themeApplied`
 is also emitted for future integrations.
+
+## Appearance overrides
+
+The global settings application can apply non-destructive overrides on top of
+the active theme. They are stored in `settings.json` and read by `Theme.qml`:
+
+| Setting | Effect |
+|---|---|
+| Font family | Replaces the text font family; icon glyphs keep the theme's icon font |
+| Text scale | Scales every typography size token |
+| Corner radius scale | Scales the radius tokens used by every surface and control |
+| Surface opacity | Replaces the theme opacity used by bar and popup backgrounds |
+| Animations | Disables transitions or scales all theme animation durations |
+
+The settings window itself uses the same `Theme` facade, so changing a theme or
+an override updates the settings UI immediately. Custom themes in
+`themes/custom/*.json` continue to appear automatically.
+
+See [`SETTINGS.md`](SETTINGS.md) for the UI and persistence details.

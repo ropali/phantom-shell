@@ -43,7 +43,11 @@ Item {
 
         width: root.barWidth
         height: Config.Settings.barHeight
-        x: (root.width - width) / 2
+        x: Config.Settings.barAlignment === "left"
+            ? Math.max(0, Math.min(root.width - width, Config.Settings.edgeGap))
+            : Config.Settings.barAlignment === "right"
+                ? root.width - width - Math.max(0, Math.min(root.width - width, Config.Settings.edgeGap))
+                : (root.width - width) / 2
         y: Config.Settings.barPosition === "bottom" ? root.height - height : 0
         radius: Theme.radius
         color: Theme.barBackground

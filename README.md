@@ -4,8 +4,9 @@ Phantom is a modular Quickshell desktop shell for CachyOS + Hyprland + Wayland,
 intended to become a standalone project.
 
 This repository implements **Milestone 0** (environment preparation),
-**Milestone 1** (status bar), **Milestone 2** (shared shell services) and
-**Milestone 3** (control center), plus the mandatory **global theming system**.
+**Milestone 1** (status bar), **Milestone 2** (shared shell services),
+**Milestone 3** (control center) and **Milestone 4** (global settings
+application), plus the mandatory **global theming system**.
 It is intended to become a standalone project called Phantom; the extraction and
 packaging plan is in [`docs/STANDALONE.md`](docs/STANDALONE.md).
 
@@ -74,8 +75,13 @@ phantom-shell/
 │   │   ├── ControlCenterKeys.qml
 │   │   ├── MediaCard.qml
 │   │   └── views/            # Wi-Fi, Bluetooth, audio, theme, wallpaper details
+│   ├── settings/             # global settings window, sidebar and pages
+│   │   ├── SettingsWindow.qml
+│   │   ├── SettingsSidebar.qml
+│   │   ├── SettingsContent.qml
+│   │   └── pages/            # panel, appearance, clock, calendar, etc.
 │   ├── nightlight/           # click-through warm overlay
-│   └── wallpaper/Wallpaper.qml   # static wallpaper surface
+│   └── wallpaper/Wallpaper.qml   # wallpaper surface with scaling and fade
 ├── components/
 │   ├── AudioPanel.qml        # shared with the bar audio popup
 │   ├── BluetoothPanel.qml    # shared with the bar Bluetooth popup
@@ -87,6 +93,7 @@ phantom-shell/
 │   ├── QuickToggle.qml
 │   ├── SettingRow.qml
 │   ├── SettingSlider.qml
+│   ├── Settings*.qml         # settings cards, rows, inputs and controls
 │   ├── StatChip.qml
 │   ├── ThemePicker.qml
 │   ├── ToggleSwitch.qml
@@ -97,6 +104,7 @@ phantom-shell/
 │   ├── PACKAGES.md
 │   ├── SERVICES.md
 │   ├── SESSION.md
+│   ├── SETTINGS.md
 │   ├── STANDALONE.md
 │   ├── TESTING.md
 │   └── THEMING.md
@@ -167,6 +175,21 @@ Night light is a click-through warm overlay, so it works without a gamma daemon
 or backlight control. Brightness is shown as unavailable on systems without a
 `backlight` device. See [`docs/SERVICES.md`](docs/SERVICES.md).
 
+## Global settings
+
+The dedicated settings application is opened with `SUPER + ,`, from the gear
+icon in the control center header, or with:
+
+```bash
+qs ipc -p $HOME/Workspace/phantom-shell call phantom settings
+```
+
+It is a centered, themed window with a searchable sidebar and pages for Panel,
+Appearance, Date & Time, Calendar, Control Center, Launcher, Notifications,
+Wallpaper, Keyboard Shortcuts and Advanced. Settings are applied immediately
+and persisted in `bar.json` and `settings.json` under Quickshell's state path.
+See [`docs/SETTINGS.md`](docs/SETTINGS.md) for the full reference.
+
 ## Bar configuration
 
 Bar width is percentage-based (`barWidthPercent`), the gap between the bar and
@@ -212,8 +235,9 @@ the migration rules. Hyprland creates a missing workspace when it is activated.
 Workspace clicks use the Hyprland 0.57 Lua IPC dispatch syntax.
 
 The Noctalia IPC binds were removed. `SUPER + SPACE` now launches
-`hyprlauncher`; the direct `wpctl` and `brightnessctl` binds remain active, as do
-the playerctl media keys.
+`hyprlauncher`; `SUPER + ,` opens the Phantom settings window through the
+`phantom` IPC target; the direct `wpctl` and `brightnessctl` binds remain active,
+as do the playerctl media keys.
 
 ## Known limitations
 
@@ -222,7 +246,10 @@ the playerctl media keys.
   Use `hyprlauncher` (`SUPER + SPACE`) and the Phantom control center; Phantom's
   own launcher is scheduled for Milestone 5.
 - There is currently no notification daemon. Applications that require
-  `org.freedesktop.Notifications` will not show notifications until Milestone 4.
+  `org.freedesktop.Notifications` will not show notifications until the
+  notification milestone.
+- The Launcher and Notifications settings categories are placeholders. Shortcut
+  editing is read-only so Phantom never rewrites Hyprland bindings.
 - Wi-Fi scanning starts when the network popup opens and may take several seconds
   to populate. The list is disabled again when the popup closes.
 - Connecting to a new WPA/WPA2/SAE network opens a password prompt. Enterprise

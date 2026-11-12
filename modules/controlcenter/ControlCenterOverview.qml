@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell.Services.UPower
 import "../../themes"
+import "../../config" as Config
 import "../../services" as Services
 import "../../components" as Components
 
@@ -19,6 +20,81 @@ Item {
         : Theme.success
 
     implicitHeight: content.implicitHeight + Theme.spacing.xl * 2
+
+    function widgetIcon(id) {
+        if (id === "wifi") return "\uf1eb";
+        if (id === "bluetooth") return "\uf293";
+        if (id === "power") return "\uf06c";
+        if (id === "nightlight") return "\uf186";
+        if (id === "dnd") return "\uf1f6";
+        if (id === "microphone") return Services.Audio.sourceMuted ? "\uf131" : "\uf130";
+        return "\uf111";
+    }
+
+    function widgetTitle(id) {
+        if (id === "wifi") return "Wi-Fi";
+        if (id === "bluetooth") return "Bluetooth";
+        if (id === "power") return "Power profile";
+        if (id === "nightlight") return "Night light";
+        if (id === "dnd") return "Silent";
+        if (id === "microphone") return "Microphone";
+        return id;
+    }
+
+    function widgetSubtitle(id) {
+        if (id === "wifi") {
+            return !Services.Network.wifiEnabled ? "Disabled"
+                : Services.Network.wifiConnected && Services.Network.connectedWifiNetwork
+                    ? Services.Network.connectedWifiNetwork.name
+                    : Services.Network.wiredConnected ? "Ethernet" : "Enabled";
+        }
+        if (id === "bluetooth") {
+            return !Services.Bluetooth.available ? "Unavailable"
+                : !Services.Bluetooth.enabled ? "Disabled"
+                : Services.Bluetooth.connectedDeviceLabel.length > 0
+                    ? Services.Bluetooth.connectedDeviceLabel : "Enabled";
+        }
+        if (id === "power")
+            return Services.PowerProfiles.profileLabel(Services.PowerProfiles.profile);
+        if (id === "nightlight")
+            return Services.NightLight.enabled ? Services.NightLight.temperature + "K" : "Off";
+        if (id === "dnd")
+            return Services.Notifications.doNotDisturb ? "On" : "Off";
+        if (id === "microphone")
+            return Services.Audio.sourceMuted ? "Muted" : "Unmuted";
+        return "";
+    }
+
+    function widgetActive(id) {
+        if (id === "wifi") return Services.Network.wifiEnabled;
+        if (id === "bluetooth") return Services.Bluetooth.enabled;
+        if (id === "power") return Services.PowerProfiles.profile === PowerProfile.PowerSaver;
+        if (id === "nightlight") return Services.NightLight.enabled;
+        if (id === "dnd") return Services.Notifications.doNotDisturb;
+        if (id === "microphone") return Services.Audio.source !== null && !Services.Audio.sourceMuted;
+        return false;
+    }
+
+    function widgetEnabled(id) {
+        if (id === "wifi") return Services.Network.wifiHardwareEnabled;
+        if (id === "bluetooth") return Services.Bluetooth.available;
+        if (id === "microphone") return Services.Audio.source !== null;
+        return true;
+    }
+
+    function widgetDetail(id) {
+        return id === "microphone" ? "audio" : id;
+    }
+
+    function toggleWidget(id) {
+        if (id === "wifi") Services.Network.toggleWifi();
+        else if (id === "bluetooth") Services.Bluetooth.toggle();
+        else if (id === "nightlight") Services.NightLight.toggle();
+        else if (id === "dnd") Services.Notifications.toggleDnd();
+        else if (id === "microphone") Services.Audio.toggleSourceMute();
+        else if (id === "power") root.openDetail("power");
+    }
+
 
     // Background gradient overlay for depth
     Rectangle {
@@ -119,7 +195,10 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.openDetail("bar")
+                        onClicked: {
+                            root.closeRequested();
+                            Services.UiState.openSettings();
+                        }
                     }
                 }
 
@@ -165,85 +244,28 @@ Item {
 
         GridLayout {
             width: parent.width
-            columns: 2
-            columnSpacing: Theme.spacing.md
-            rowSpacing: Theme.spacing.md
+            columns: Config.Settings.controlCenterColumns
+            columnSpacing: Config.Settings.controlCenterSpacing
+            rowSpacing: Config.Settings.controlCenterSpacing
+            visible: Config.Settings.controlCenterVisibleWidgets().length > 0
 
-            Components.ToggleCard {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 62
-                icon: "\uf1eb"
-                title: "Wi-Fi"
-                subtitle: !Services.Network.wifiEnabled ? "Disabled"
-                    : Services.Network.wifiConnected && Services.Network.connectedWifiNetwork
-                        ? Services.Network.connectedWifiNetwork.name
-                        : Services.Network.wiredConnected ? "Ethernet" : "Enabled"
-                active: Services.Network.wifiEnabled
-                isEnabled: Services.Network.wifiHardwareEnabled
-                onToggled: Services.Network.toggleWifi()
-                onDetailClicked: root.openDetail("wifi")
-            }
+            Repeater {
+                model: Config.Settings.controlCenterVisibleWidgets()
 
-            Components.ToggleCard {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 62
-                icon: "\uf293"
-                title: "Bluetooth"
-                subtitle: !Services.Bluetooth.available ? "Unavailable"
-                    : !Services.Bluetooth.enabled ? "Disabled"
-                    : Services.Bluetooth.connectedDeviceLabel.length > 0
-                        ? Services.Bluetooth.connectedDeviceLabel : "Enabled"
-                active: Services.Bluetooth.enabled
-                isEnabled: Services.Bluetooth.available
-                onToggled: Services.Bluetooth.toggle()
-                onDetailClicked: root.openDetail("bluetooth")
-            }
+                delegate: Components.ToggleCard {
+                    required property var modelData
 
-            Components.ToggleCard {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 62
-                icon: "\uf06c"
-                title: "Power profile"
-                subtitle: Services.PowerProfiles.profileLabel(Services.PowerProfiles.profile)
-                active: Services.PowerProfiles.profile === PowerProfile.PowerSaver
-                onToggled: root.openDetail("power")
-                onDetailClicked: root.openDetail("power")
-            }
-
-            Components.ToggleCard {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 62
-                icon: "\uf186"
-                title: "Night light"
-                subtitle: Services.NightLight.enabled
-                    ? Services.NightLight.temperature + "K" : "Off"
-                active: Services.NightLight.enabled
-                onToggled: Services.NightLight.toggle()
-                onDetailClicked: root.openDetail("nightlight")
-            }
-
-            Components.ToggleCard {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 62
-                icon: "\uf1f6"
-                title: "Silent"
-                subtitle: Services.Notifications.doNotDisturb ? "On" : "Off"
-                active: Services.Notifications.doNotDisturb
-                emphasis: true
-                onToggled: Services.Notifications.toggleDnd()
-                onDetailClicked: root.openDetail("dnd")
-            }
-
-            Components.ToggleCard {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 62
-                icon: Services.Audio.sourceMuted ? "\uf131" : "\uf130"
-                title: "Microphone"
-                subtitle: Services.Audio.sourceMuted ? "Muted" : "Unmuted"
-                active: Services.Audio.source !== null && !Services.Audio.sourceMuted
-                isEnabled: Services.Audio.source !== null
-                onToggled: Services.Audio.toggleSourceMute()
-                onDetailClicked: root.openDetail("audio")
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 62
+                    icon: root.widgetIcon(modelData.id)
+                    title: root.widgetTitle(modelData.id)
+                    subtitle: root.widgetSubtitle(modelData.id)
+                    active: root.widgetActive(modelData.id)
+                    isEnabled: root.widgetEnabled(modelData.id)
+                    emphasis: modelData.id === "dnd"
+                    onToggled: root.toggleWidget(modelData.id)
+                    onDetailClicked: root.openDetail(root.widgetDetail(modelData.id))
+                }
             }
         }
 
@@ -251,6 +273,7 @@ Item {
         Rectangle {
             width: parent.width
             height: 90
+            visible: Config.Settings.controlCenterShowSliders
             radius: Theme.radius
             color: Theme.panelSurface
             border.width: Theme.borderWidth
@@ -309,12 +332,14 @@ Item {
 
         MediaCard {
             width: parent.width
+            visible: Config.Settings.controlCenterShowMedia
         }
 
         // Theme and Wallpaper cards with improved visuals
         RowLayout {
             width: parent.width
             height: 94
+            visible: Config.Settings.controlCenterShowThemeWallpaper
             spacing: Theme.spacing.md
 
             Rectangle {

@@ -869,7 +869,507 @@ Verify:
 **Acceptance criterion:** The control center must initially feel like a compact dashboard. Detailed system configuration should only appear after the user explicitly opens the corresponding widget.
 ---
 
-# Milestone 4: Notification Center and Notification Popups
+
+# Milestone 4: Global Settings Application
+
+**Priority: High**
+
+## 1. Objective
+
+Build a centralized settings application for Phantom.
+
+The settings application should allow users to configure the appearance, behavior and functionality of all Phantom modules from one place.
+
+This must be a dedicated settings interface, separate from the Control Center.
+
+The Control Center provides quick access to system controls, whereas the Global Settings application manages persistent shell configuration.
+
+Examples:
+
+- Control Center: Toggle a feature or select a quick setting.
+- Global Settings: Configure how that feature behaves and appears.
+
+The settings application must follow the global ThemeManager so its appearance changes whenever the active theme changes.
+
+## 2. UI and layout requirements
+
+Create a centered settings window using Quickshell.
+
+### Window positioning
+
+- Appear in the center of the active monitor.
+- Use a floating window/panel style.
+- Have configurable width and height.
+- Have rounded corners.
+- Use the global theme.
+- Support smooth opening and closing animations.
+- Close using Escape.
+- Support outside-click dismissal where appropriate.
+- Support multiple monitors.
+- Keep the window within the available screen area.
+
+### Main layout
+
+Use a two-column layout:
+
+| Section | Width |
+|---|---:|
+| Left sidebar | 30% |
+| Right content area | 70% |
+
+The proportions should be configurable, with 30/70 as the default.
+
+### Left sidebar
+
+The sidebar should contain navigation categories with icons and labels.
+
+Required categories:
+
+1. Panel
+2. Appearance
+3. Date & Time
+4. Calendar
+5. Control Center
+6. Launcher
+7. Notifications
+8. Wallpaper
+9. Keyboard Shortcuts
+10. Advanced
+
+Requirements:
+
+- Clearly highlight the selected category.
+- Show the category icon and name.
+- Allow switching between categories.
+- Preserve the current category when changing settings.
+- Support keyboard navigation.
+- Allow the sidebar to scroll independently if required.
+- Include a settings search option if practical.
+
+### Right content area
+
+When a sidebar category is selected, display its settings in the right section.
+
+Requirements:
+
+- Display a clear category heading.
+- Provide a short description.
+- Organize settings into logical groups.
+- Use consistent labels and descriptions.
+- Use appropriate controls such as switches, sliders, dropdowns, segmented controls, color pickers and text inputs.
+- Avoid overwhelming the user with too many settings at once.
+- Support independent scrolling when necessary.
+
+Settings should be grouped into cards or sections rather than displayed as an unstructured list.
+
+## 3. Settings categories and functionality
+
+### A. Panel
+
+Allow configuration of the Phantom status bar.
+
+#### General
+
+- Enable/disable the status bar.
+- Select bar style (Classic / Pills).
+- Select top or bottom position.
+- Set bar height.
+- Set left and right screen margins.
+- Configure horizontal alignment.
+- Set corner radius.
+- Set internal padding.
+- Configure opacity and transparency.
+
+#### Modules
+
+Allow configuration of individual bar modules.
+
+- Date and time.
+- Workspace indicator.
+- System tray.
+- Network indicator.
+- Bluetooth indicator.
+- Audio indicator.
+- Notification button.
+- Control Center button.
+- Power button.
+
+Allow users to:
+
+- Show/hide modules.
+- Change module order where supported.
+- Configure module spacing.
+- Configure individual module appearance.
+- Reset module configuration.
+
+Preserve the existing bar layout and drag-reordering functionality.
+
+Do not break the existing `bar.json` configuration or discard user customizations.
+
+### B. Appearance
+
+Manage the overall visual appearance of Phantom.
+
+#### Themes
+
+- List installed themes.
+- Display theme previews.
+- Select active theme.
+- Support custom themes.
+- Apply themes immediately.
+- Persist the selected theme.
+
+#### Typography
+
+- Font family.
+- Font size.
+- Font weight.
+- Icon font where applicable.
+
+#### Interface appearance
+
+- Interface density (Compact / Comfortable / Spacious).
+- Border radius.
+- Shadows.
+- Transparency.
+- Blur intensity where supported.
+- Animation enable/disable.
+- Animation speed.
+
+All appearance settings must use the shared ThemeManager and design tokens.
+
+Avoid implementing separate theme configuration inside individual modules.
+
+### C. Date & Time
+
+Configure the date and time display in the status bar.
+
+#### Clock
+
+- 12-hour / 24-hour format.
+- Show/hide seconds.
+- Show/hide AM/PM.
+- Custom time format.
+- Timezone display.
+- Show/hide clock.
+
+#### Date
+
+- Custom date format.
+- Short/long date format.
+- Show/hide weekday.
+- Show/hide year.
+- Configure date and time ordering.
+
+Provide a preview of the selected date/time format.
+
+Use the system's actual local time unless the user explicitly configures another display timezone.
+
+Changing display timezone must not change the operating system's system timezone.
+
+### D. Calendar
+
+Configure the calendar popup opened from the status bar.
+
+Settings:
+
+- First day of the week (Sunday / Monday / Custom).
+- Show/hide week numbers.
+- Show/hide adjacent month dates.
+- Highlight today's date.
+- Calendar popup dimensions.
+- Calendar appearance.
+- Date selection behavior.
+- Configurable week-start convention.
+
+Where appropriate, allow calendar appearance to inherit from the global theme.
+
+Provide a preview of the calendar configuration.
+
+### E. Control Center
+
+Configure the widget-based Control Center.
+
+Allow users to:
+
+- Enable/disable individual widgets.
+- Reorder widgets.
+- Configure the number of columns.
+- Configure card spacing.
+- Configure panel dimensions.
+- Configure widget appearance.
+- Configure quick-toggle availability.
+
+Widgets include:
+
+- Wi-Fi.
+- Bluetooth.
+- Audio.
+- Brightness.
+- Battery.
+- Power profiles.
+- Night Light.
+- Do Not Disturb.
+- Theme selector.
+- Wallpaper selector.
+
+Do not duplicate system service configuration here. These settings should control presentation and behavior, not reimplement the actual system integrations.
+
+### F. Launcher
+
+This category should be prepared for the future application launcher milestone.
+
+Potential settings:
+
+- Launcher width and height.
+- Position.
+- Application icon size.
+- Search behavior.
+- Search result limit.
+- Fuzzy matching.
+- Recent applications.
+- Enabled search providers.
+- Default search provider.
+- Keyboard navigation behavior.
+
+Only expose settings for functionality that has actually been implemented.
+
+### G. Notifications
+
+Prepare this category for the future notification milestone.
+
+Potential settings:
+
+- Popup position.
+- Popup timeout.
+- Maximum visible notifications.
+- Notification history limit.
+- Grouping by application.
+- Application-specific notification behavior.
+- Do Not Disturb preferences.
+- Urgency-based popup behavior.
+
+The notification service must remain the single source of truth.
+
+### H. Wallpaper
+
+Configure wallpaper-related functionality.
+
+Settings:
+
+- Wallpaper directories.
+- Default wallpaper.
+- Wallpaper scaling mode.
+- Transition animation.
+- Transition duration.
+- Random wallpaper behavior.
+- Multi-monitor wallpaper behavior.
+
+The actual wallpaper selector remains accessible from the Control Center.
+
+### I. Keyboard Shortcuts
+
+Provide a centralized place to view and configure Phantom keyboard shortcuts.
+
+Examples:
+
+| Shortcut | Action |
+|---|---|
+| SUPER + SPACE | Application launcher |
+| SUPER + A | Control Center |
+| SUPER + N | Notification center |
+| SUPER + T | Theme switching |
+| SUPER + , | Global settings |
+
+Requirements:
+
+- Display all registered Phantom shortcuts.
+- Allow changing shortcuts where supported.
+- Detect conflicts.
+- Clearly distinguish Hyprland-managed shortcuts from internal shell shortcuts.
+- Persist custom shortcuts.
+- Never silently overwrite existing Hyprland bindings.
+
+Hyprland-managed shortcuts should be modified through a safe configuration mechanism rather than directly rewriting the user's entire Hyprland configuration.
+
+### J. Advanced
+
+Provide advanced configuration and maintenance options.
+
+Potential features:
+
+- Configuration directory information.
+- Current Phantom version.
+- Quickshell version.
+- Configuration validation.
+- Debug logging.
+- Diagnostics.
+- Reset individual category.
+- Reset all Phantom settings.
+- Export configuration.
+- Import configuration.
+- Restore defaults.
+
+Provide confirmation before destructive reset operations.
+
+## 4. Configuration architecture
+
+The settings UI must not directly own or duplicate configuration state.
+
+Create a centralized configuration management layer.
+
+Suggested structure:
+
+```text
+config/
+├── ConfigManager.qml
+├── Settings.qml
+├── Defaults.qml
+├── Schema.qml
+└── migrations/
+    └── ...
+
+modules/
+└── settings/
+    ├── SettingsWindow.qml
+    ├── SettingsSidebar.qml
+    ├── SettingsContent.qml
+    ├── SettingsNavigation.qml
+    │
+    └── pages/
+        ├── PanelSettings.qml
+        ├── AppearanceSettings.qml
+        ├── DateTimeSettings.qml
+        ├── CalendarSettings.qml
+        ├── ControlCenterSettings.qml
+        ├── LauncherSettings.qml
+        ├── NotificationSettings.qml
+        ├── WallpaperSettings.qml
+        ├── ShortcutSettings.qml
+        └── AdvancedSettings.qml
+```
+
+### Configuration principles
+
+1. Every module must consume configuration from the centralized configuration manager.
+2. Settings changes should update the corresponding module reactively.
+3. Persist configuration across shell restarts.
+4. Validate values before saving.
+5. Provide sensible defaults.
+6. Handle missing or invalid configuration files gracefully.
+7. Support future configuration schema migrations.
+8. Avoid storing settings separately inside individual QML components.
+
+Use modular configuration files where appropriate, rather than one enormous configuration file.
+
+For example:
+
+```text
+config/
+├── general.json
+├── appearance.json
+├── bar.json
+├── datetime.json
+├── calendar.json
+├── control-center.json
+├── launcher.json
+├── notifications.json
+├── wallpaper.json
+└── shortcuts.json
+```
+
+The configuration manager should provide a unified interface regardless of how settings are physically stored.
+
+Use `$HOME`-portable paths and Quickshell's configuration/state path helpers. Never hardcode a username or absolute home directory.
+
+### Saving behavior
+
+- Apply ordinary settings immediately.
+- Persist changes safely.
+- Avoid writing configuration files on every animation frame or slider movement.
+- Debounce frequent updates such as slider adjustments.
+- Provide a reset-to-default option.
+- Handle failed writes without corrupting existing configuration.
+
+## 5. Settings window entry point
+
+Add a global shortcut:
+
+`SUPER + ,` → Open Phantom Settings.
+
+Also provide an entry point from:
+
+- Control Center settings icon.
+- Future launcher search.
+- Other appropriate shell menus.
+
+All entry points must open the same settings window instance.
+
+Do not create duplicate settings windows.
+
+## 6. Global theme integration
+
+The settings application itself must be fully themeable.
+
+Every setting component should use shared design tokens.
+
+This includes:
+
+- Sidebar.
+- Navigation items.
+- Cards.
+- Switches.
+- Sliders.
+- Dropdowns.
+- Inputs.
+- Tooltips.
+- Section headings.
+- Dialogs.
+- Preview components.
+
+Changing the active theme must update the entire settings interface immediately.
+
+Adding a new theme must not require changes to settings page QML files.
+
+## 7. Testing requirements
+
+Verify:
+
+1. Settings window opens centered on the active monitor.
+2. Sidebar uses the 30/70 layout.
+3. All implemented categories are accessible.
+4. Selecting a category updates the right content area.
+5. Settings are grouped and
+
+### Implementation status
+
+The core settings application is implemented:
+
+- `modules/settings/SettingsWindow.qml` provides the centered, themed,
+  full-screen overlay with a 30/70 sidebar/content split and outside-click and
+  Escape dismissal.
+- `SettingsSidebar.qml`, `SettingsContent.qml` and `pages/` implement all ten
+  required categories. Panel, Appearance, Date & Time, Calendar, Control Center,
+  Wallpaper, Keyboard Shortcuts and Advanced are functional; Launcher and
+  Notifications are placeholders for their milestones.
+- `config/Settings.qml` is the centralized store. Bar geometry and module order
+  persist in `bar.json`; date/time, calendar, appearance, wallpaper, control
+  center and window options persist in `settings.json`; theme and wallpaper
+  paths remain in `theme.json` and `wallpaper.json`.
+- Appearance overrides flow through `Theme.qml` (font family, text scale,
+  radius scale, opacity and animation speed).
+- Entry points: `SUPER + ,`, the control center gear and the `phantom` IPC
+  target (`settings` and `toggleSettings`). All use one window instance.
+- Reusable settings components live in `components/Settings*.qml`; theme and
+  wallpaper selection reuse the existing `ThemePicker`, `WallpaperPicker`,
+  `ThemeManager` and `Wallpapers` implementations.
+- Advanced includes diagnostics, per-category resets and a confirmed reset-all.
+
+Deferred: launcher/notification settings, shortcut editing (read-only because
+Hyprland bindings are not rewritten), configuration import/export and
+per-monitor wallpapers. These are documented in `docs/SETTINGS.md`.
+
+# Milestone 5: Notification Center and Notification Popups
 
 **Priority: High**
 

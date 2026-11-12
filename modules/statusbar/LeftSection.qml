@@ -10,13 +10,17 @@ Item {
     property var controller: null
     property alias groupSlot: leftGroupSlot
 
+    readonly property bool dateFirst: Config.Settings.dateTimeOrder === "date-first"
+    readonly property bool needsSeconds: Config.Settings.clockShowSeconds
+        || Config.Settings.timeFormatOverride.indexOf("s") !== -1
+
     implicitWidth: row.implicitWidth
     implicitHeight: Config.Settings.barHeight
 
     SystemClock {
         id: clock
         enabled: true
-        precision: SystemClock.Minutes
+        precision: root.needsSeconds ? SystemClock.Seconds : SystemClock.Minutes
     }
 
     Row {
@@ -42,34 +46,31 @@ Item {
             id: clockArea
             width: clockRow.implicitWidth
             height: Config.Settings.barHeight
+            visible: Config.Settings.dateShow || Config.Settings.clockShow
 
             Row {
                 id: clockRow
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Theme.spacing.md
 
-                Text {
+                Loader {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: Qt.formatDateTime(clock.date, Config.Settings.dateFormat)
-                    color: Theme.mutedForeground
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize
+                    visible: root.dateFirst ? Config.Settings.dateShow : Config.Settings.clockShow
+                    sourceComponent: root.dateFirst ? dateTextComponent : timeTextComponent
                 }
 
                 Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
+                    visible: Config.Settings.dateShow && Config.Settings.clockShow
                     width: 1
                     height: Theme.controlHeight - Theme.spacing.xl - Theme.spacing.sm
                     color: Theme.border
                 }
 
-                Text {
+                Loader {
                     anchors.verticalCenter: parent.verticalCenter
-                    text: Qt.formatDateTime(clock.date, Config.Settings.timeFormat)
-                    color: Theme.foreground
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize
-                    font.weight: Theme.fontWeightBold
+                    visible: root.dateFirst ? Config.Settings.clockShow : Config.Settings.dateShow
+                    sourceComponent: root.dateFirst ? timeTextComponent : dateTextComponent
                 }
             }
 
@@ -107,4 +108,26 @@ Item {
         anchorItem: clockArea
     }
 
+    Component {
+        id: dateTextComponent
+
+        Text {
+            text: Qt.formatDateTime(clock.date, Config.Settings.dateFormat)
+            color: Theme.mutedForeground
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSize
+        }
+    }
+
+    Component {
+        id: timeTextComponent
+
+        Text {
+            text: Qt.formatDateTime(clock.date, Config.Settings.timeFormat)
+            color: Theme.foreground
+            font.family: Theme.fontFamily
+            font.pixelSize: Theme.fontSize
+            font.weight: Theme.fontWeightBold
+        }
+    }
 }

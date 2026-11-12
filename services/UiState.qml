@@ -4,6 +4,7 @@ import Quickshell
 Singleton {
     property int openCount: 0
     property bool detailOpen: false
+    property bool settingsOpen: false
     readonly property bool anyOpen: openCount > 0
 
     signal dismissRequested()
@@ -23,5 +24,21 @@ Singleton {
 
     function closeDetail() {
         detailCloseRequested();
+    }
+
+    function openSettings() {
+        dismissRequested();
+        settingsOpen = true;
+    }
+
+    function closeSettings() {
+        settingsOpen = false;
+    }
+
+    function toggleSettings() {
+        if (settingsOpen)
+            closeSettings();
+        else
+            openSettings();
     }
 }

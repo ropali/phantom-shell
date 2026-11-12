@@ -21,14 +21,15 @@ PanelWindow {
     margins.right: 0
 
     implicitHeight: Config.Settings.barHeight + Config.Settings.screenMargin
+    visible: Config.Settings.barVisible
 
     readonly property int compositorGap: Config.Settings.barPosition === "bottom"
         ? Services.Hyprland.gapsOutBottom
         : Services.Hyprland.gapsOutTop
 
-    exclusiveZone: Math.max(0,
+    exclusiveZone: Config.Settings.barVisible ? Math.max(0,
         Config.Settings.barHeight + Config.Settings.barWindowGap
-        - compositorGap - Theme.borderWidth)
+        - compositorGap - Theme.borderWidth) : 0
     color: "transparent"
     aboveWindows: true
     focusable: false

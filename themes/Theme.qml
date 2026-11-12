@@ -1,6 +1,7 @@
 pragma Singleton
 import Quickshell
 import QtQuick
+import "../config" as Config
 
 Singleton {
     readonly property var palette: ThemeManager.palette
@@ -28,26 +29,27 @@ Singleton {
     readonly property color onSecondary: colors.onSecondary
     readonly property color onTertiary: colors.onTertiary
 
-    readonly property string fontFamily: typography.fontFamily
+    readonly property string fontFamily: Config.Settings.fontFamilyOverride.length > 0
+        ? Config.Settings.fontFamilyOverride : typography.fontFamily
     readonly property string iconFontFamily: typography.iconFontFamily
-    readonly property int fontSizeTiny: typography.sizeTiny
-    readonly property int fontSizeSmall: typography.sizeSmall
-    readonly property int fontSizeBase: typography.sizeBase
-    readonly property int fontSizeMedium: typography.sizeMedium
-    readonly property int fontSize: typography.size
-    readonly property int fontSizeLarge: typography.sizeLarge
-    readonly property int fontSizeXLarge: typography.sizeXLarge
+    readonly property int fontSizeTiny: Math.max(6, Math.round(typography.sizeTiny * Config.Settings.uiScale))
+    readonly property int fontSizeSmall: Math.max(6, Math.round(typography.sizeSmall * Config.Settings.uiScale))
+    readonly property int fontSizeBase: Math.max(6, Math.round(typography.sizeBase * Config.Settings.uiScale))
+    readonly property int fontSizeMedium: Math.max(6, Math.round(typography.sizeMedium * Config.Settings.uiScale))
+    readonly property int fontSize: Math.max(6, Math.round(typography.size * Config.Settings.uiScale))
+    readonly property int fontSizeLarge: Math.max(6, Math.round(typography.sizeLarge * Config.Settings.uiScale))
+    readonly property int fontSizeXLarge: Math.max(6, Math.round(typography.sizeXLarge * Config.Settings.uiScale))
     readonly property int fontWeightNormal: typography.weightNormal
     readonly property int fontWeightMedium: typography.weightMedium
     readonly property int fontWeightBold: typography.weightBold
     readonly property real lineHeight: typography.lineHeight
 
-    readonly property int radius: components.radius
-    readonly property int radiusSmall: components.radiusSmall
-    readonly property int radiusLarge: components.radiusLarge
+    readonly property int radius: Math.max(0, Math.round(components.radius * Config.Settings.radiusScale))
+    readonly property int radiusSmall: Math.max(0, Math.round(components.radiusSmall * Config.Settings.radiusScale))
+    readonly property int radiusLarge: Math.max(0, Math.round(components.radiusLarge * Config.Settings.radiusScale))
     readonly property int borderWidth: components.borderWidth
     readonly property int padding: components.padding
-    readonly property real opacity: components.opacity
+    readonly property real opacity: Config.Settings.shellOpacity
     readonly property int buttonSize: components.buttonSize
     readonly property int iconSize: components.iconSize
     readonly property int trayIconSize: components.trayIconSize
@@ -56,9 +58,12 @@ Singleton {
     readonly property int rowHeight: components.rowHeight
     readonly property bool shadow: components.shadow
 
-    readonly property int animationFast: animation.fast
-    readonly property int animationNormal: animation.normal
-    readonly property int animationSlow: animation.slow
+    readonly property int animationFast: Config.Settings.animationsEnabled
+        ? Math.max(0, Math.round(animation.fast * Config.Settings.animationScale)) : 0
+    readonly property int animationNormal: Config.Settings.animationsEnabled
+        ? Math.max(0, Math.round(animation.normal * Config.Settings.animationScale)) : 0
+    readonly property int animationSlow: Config.Settings.animationsEnabled
+        ? Math.max(0, Math.round(animation.slow * Config.Settings.animationScale)) : 0
 
     readonly property int easingType: {
         switch (animation.easing) {
